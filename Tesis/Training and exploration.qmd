@@ -23,6 +23,7 @@ my_url <- "(https://docs.google.com/spreadsheets/d/1SF5DDTEfbQFSNjvYKQnsQKdsBdE7
 
 subte <- googlesheets4::read_sheet(my_url)
 subte <- subte %>% 
+  mutate(Year = as.integer(Periodo)) %>% 
   mutate(Periodo = as.factor(Periodo))
 ```
 
@@ -142,4 +143,23 @@ subte %>%
   group_by(Cromatica, Producto) %>%
   ggplot(aes(x= Producto, fill=Cromatica))+
   geom_bar()
+```
+
+```{r}
+subte %>% 
+  group_by(Periodo) %>% 
+  tally()
+```
+
+## Estilo Linea de Tiempo
+
+```{r}
+subte %>% 
+  group_by(Year) %>% 
+  tally() %>% 
+  ggplot(aes(x=Year,y=n))+
+  geom_line()+
+  geom_point(size=3)+
+  geom_point(size=2,color="white")+
+  xlab("Año")
 ```
