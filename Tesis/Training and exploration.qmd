@@ -7,6 +7,7 @@ editor: visual
 
 ```{r setup, echo=FALSE}
 library(tidyverse, quietly = TRUE)
+library(googlesheets4)
 ```
 
 #### Acceso a los datos
@@ -115,5 +116,3 @@ subte %>%
 ```
 
 #### 
-
-
