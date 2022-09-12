@@ -7,7 +7,11 @@ editor: visual
 
 ```{r setup, echo=FALSE}
 library(tidyverse, quietly = TRUE)
+library(ggthemes)
 library(googlesheets4)
+theme_set(
+  theme_test()
+  )
 ```
 
 #### Acceso a los datos
@@ -18,6 +22,8 @@ gs4_deauth()
 my_url <- "(https://docs.google.com/spreadsheets/d/1SF5DDTEfbQFSNjvYKQnsQKdsBdE7oJeTywCk92pB7f8/edit#gid=1964221805)"
 
 subte <- googlesheets4::read_sheet(my_url)
+subte <- subte %>% 
+  mutate(Periodo = as.factor(Periodo))
 ```
 
 #### Propósito
@@ -42,13 +48,11 @@ subte %>% head()
 Cantidad de publicidades con presencia efectiva en el sistema subterráneo
 
 ```{r, echo=FALSE}
-library(ggthemes)
-theme_set(theme_test())
 subte %>%
   group_by(Periodo) %>%
   tally() %>%
   ggplot(aes(x=Periodo, y=n))+
-  geom_col()
+  geom_col(fill="#3345ff")
 ```
 
 ```{r, echo=FALSE}
@@ -68,13 +72,18 @@ Es factible observar que la primera etapa de la recolección de publicidades est
 Distribución de las publicidades en relación a la línea de subterráneo en la cual manifestaron su presencia
 
 ```{r, echo=FALSE}
-library(ggthemes)
+
 theme_set(theme_test())
 subte %>%
   group_by(Linea, Periodo) %>%
   tally() %>%
-  ggplot(aes(x=Periodo,y=Linea))+
-  geom_col()
+  ggplot(aes(x=Periodo, y = n, fill = Linea))+
+  geom_col()+
+  scale_fill_manual(values = c(A="blue",B="red",D="darkgreen"))
+```
+
+```{r}
+
 ```
 
 #### Orientación temporal
@@ -105,14 +114,15 @@ Si bien la cantidad de publicidades en `subte` es escasa, verifica una hipótesi
 ```{r, echo=FALSE}
 # Ensayando algunos parámetros modificados y otro estilo de cargada de datos
   
-ggplot(data = subte)+geom_bar(aes(y = Cromatica),            width = 0.3,fill='tomato2')+theme_test()
+ggplot(data = subte)+
+  geom_bar(aes(y = Cromatica),            width = 0.3,fill='tomato2')+theme_test()
 ```
 
 ```{r}
-subte %>% 
-  group_by(Cromatica, Producto) %>% 
-  ggplot(aes(x=Cromatica, y=Producto))+
-  geom_histogram()
+# subte %>% 
+#   group_by(Cromatica, Producto) %>% 
+#   ggplot(aes(x=Cromatica, y=Producto))+
+#   geom_histogram()
 ```
 
 #### 
