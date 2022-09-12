@@ -119,10 +119,27 @@ ggplot(data = subte)+
 ```
 
 ```{r}
-# subte %>% 
-#   group_by(Cromatica, Producto) %>% 
-#   ggplot(aes(x=Cromatica, y=Producto))+
-#   geom_histogram()
+subte %>%
+  group_by(Cromatica, Producto) %>%
+  tally()
+  # ggplot(aes(x=Cromatica, y=Producto))+
+  # geom_histogram()
 ```
 
 #### 
+
+```{r}
+subte %>%
+  group_by(Cromatica, Producto) %>%
+  tally() %>% 
+  ggplot(aes(x= Producto,y= n, fill=Cromatica))+
+  geom_col()
+  
+```
+
+```{r}
+subte %>%
+  group_by(Cromatica, Producto) %>%
+  ggplot(aes(x= Producto, fill=Cromatica))+
+  geom_bar()
+```
