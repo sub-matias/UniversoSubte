@@ -1,0 +1,119 @@
+---
+title: "Training and exploration"
+author: "Matias S"
+format: html
+editor: visual
+---
+
+```{r setup, echo=FALSE}
+library(tidyverse, quietly = TRUE)
+```
+
+#### Acceso a los datos
+
+```{r source-del-script, echo=FALSE}
+gs4_deauth()
+
+my_url <- "(https://docs.google.com/spreadsheets/d/1SF5DDTEfbQFSNjvYKQnsQKdsBdE7oJeTywCk92pB7f8/edit#gid=1964221805)"
+
+subte <- googlesheets4::read_sheet(my_url)
+```
+
+#### Propósito
+
+Documento que aborda la exploración de los datos sobre el Subte Publicitario en su primera versión: totalidad de publicidades encontradas sin discriminación de línea de subterráneo, año y dispositivo.
+
+```{r, echo=FALSE}
+subte %>%
+  knitr::kable(caption = "Raw data")
+```
+
+#### Análisis exploratorio
+
+Variables
+
+```{r, echo=FALSE}
+subte %>% head()
+```
+
+#### Años
+
+Cantidad de publicidades con presencia efectiva en el sistema subterráneo
+
+```{r, echo=FALSE}
+library(ggthemes)
+theme_set(theme_test())
+subte %>%
+  group_by(Periodo) %>%
+  tally() %>%
+  ggplot(aes(x=Periodo, y=n))+
+  geom_col()
+```
+
+```{r, echo=FALSE}
+subte %>% 
+  group_by(Periodo) %>% 
+  tally() %>% 
+  knitr::kable(
+    caption = "Numero de publicidades por año",
+    col.names = c("Año", "Número observado")
+               )
+```
+
+Es factible observar que la primera etapa de la recolección de publicidades está relacionada con la proximidad temporal, en la cual existe mayor probabilidad de encontrar "buenos datos" en años cercanos al 2022.
+
+#### Líneas de subterráneo
+
+Distribución de las publicidades en relación a la línea de subterráneo en la cual manifestaron su presencia
+
+```{r, echo=FALSE}
+library(ggthemes)
+theme_set(theme_test())
+subte %>%
+  group_by(Linea, Periodo) %>%
+  tally() %>%
+  ggplot(aes(x=Periodo,y=Linea))+
+  geom_col()
+```
+
+#### Orientación temporal
+
+Dados los parámetros arbitrarios de la base de datos, es interés abordar la variable de `orientación`
+
+```{r, echo=FALSE}
+subte$Orientacion %>%
+  unique()
+```
+
+```{r, echo=FALSE}
+library(ggthemes)
+theme_set(theme_test())
+subte %>%
+  group_by(Orientacion) %>%
+  tally() %>%
+  ggplot(aes(x=n, y=Orientacion))+
+  geom_col()
+```
+
+Si bien la cantidad de publicidades en `subte` es escasa, verifica una hipótesis vista en los antecedentes teóricos de la tesina acerca de la actividad publicitaria occidental:
+
+💡 Existe la tendencia publicitaria a referirse al presente, aunque existen aquellas que refieren al futuro o al pasado.
+
+#### Cromática y productos
+
+```{r, echo=FALSE}
+# Ensayando algunos parámetros modificados y otro estilo de cargada de datos
+  
+ggplot(data = subte)+geom_bar(aes(y = Cromatica),            width = 0.3,fill='tomato2')+theme_test()
+```
+
+```{r}
+subte %>% 
+  group_by(Cromatica, Producto) %>% 
+  ggplot(aes(x=Cromatica, y=Producto))+
+  geom_histogram()
+```
+
+#### 
+
+
