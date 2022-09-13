@@ -1,5 +1,5 @@
 # Universo Subte
-Base de datos de la tesis de grado _Universo Subte Publicitario_, la cual aborda los mensajes publicitarios gráficos de la línea de subterráneos de la Ciudad de Buenos Aires.
+Base de datos de la tesis de grado _Universo Subte Publicitario_, una investigación especializada en el ámbito de la comunicación en tránsito y en tiempos de espera acerca de los mensajes publicitarios gráficos de la línea de subterráneo de la Ciudad de Buenos Aires.
 
 ![escaladoh](https://user-images.githubusercontent.com/63526272/189772494-fd6dd6b1-dcbb-4b17-bd85-74184d56bac0.png)
 
