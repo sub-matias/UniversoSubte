@@ -36,7 +36,7 @@ Documento que aborda la exploración de los datos sobre el Subte Publicitario en
 subte %>%
   knitr::kable(caption = "Raw Data")%>%
   kable_paper()%>%
-  kable_styling(bootstrap_options = "striped", font_size = 11)
+  kable_styling(bootstrap_options = "striped", font_size = 12)
 ```
 
 #### Análisis exploratorio
