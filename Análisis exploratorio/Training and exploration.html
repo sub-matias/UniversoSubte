@@ -168,7 +168,7 @@ The following object is masked from 'package:dplyr':
 <div class="cell">
 <div class="cell-output-display">
 
-<table class=" lightable-paper table table-striped" style="font-family: &quot;Arial Narrow&quot;, arial, helvetica, sans-serif; margin-left: auto; margin-right: auto; font-size: 10px; margin-left: auto; margin-right: auto;">
+<table class=" lightable-paper table table-striped" style="font-family: &quot;Arial Narrow&quot;, arial, helvetica, sans-serif; margin-left: auto; margin-right: auto; font-size: 12px; margin-left: auto; margin-right: auto;">
 <caption style="font-size: initial !important;">Raw Data</caption>
  <thead>
   <tr>
@@ -732,8 +732,8 @@ The following object is masked from 'package:dplyr':
 </div>
 <p>Es apreciable la abundancia de material posible de recolectar por sobre la Línea B de Subte.</p>
 </section>
-<section id="orientación-temporal" class="level4">
-<h4 class="anchored" data-anchor-id="orientación-temporal">Orientación temporal</h4>
+<section id="rq1-cómo-es-representado-el-tiempo-en-las-publicidades-gráficas-del-subte" class="level4">
+<h4 class="anchored" data-anchor-id="rq1-cómo-es-representado-el-tiempo-en-las-publicidades-gráficas-del-subte">RQ1: ¿Cómo es representado el tiempo en las publicidades gráficas del Subte?</h4>
 <p>Dados los parámetros arbitrarios de la base de datos, es interés abordar la variable de <code>orientación</code></p>
 <div class="cell">
 <div class="cell-output cell-output-stdout">
@@ -747,28 +747,23 @@ The following object is masked from 'package:dplyr':
 </div>
 <p>Si bien la cantidad de publicidades en <code>subte</code> es escasa, verifica una hipótesis vista en los antecedentes teóricos de la tesina acerca de la actividad publicitaria occidental:</p>
 <p>💡 Existe la tendencia publicitaria a referirse al presente, aunque existen aquellas que refieren al futuro o al pasado.</p>
-</section>
-<section id="cromática-y-productos" class="level4">
-<h4 class="anchored" data-anchor-id="cromática-y-productos">Cromática y productos</h4>
-<p>Distribución de escala cromática utilizada por las publicidades en razón de la categoría <code>Productos</code></p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>subte <span class="sc">%&gt;%</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Cromatica, Producto) <span class="sc">%&gt;%</span></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tally</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>Producto,<span class="at">y=</span>n,<span class="at">fill=</span>Cromatica))<span class="sc">+</span></span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>()<span class="sc">+</span></span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(<span class="st">"Publicidades"</span>)<span class="sc">+</span></span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"Producto comercializado"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <p><img src="Training-and-exploration_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+</section>
+<section id="rq2cuál-es-la-utilización-de-la-paleta-de-colores-en-las-publicidades-de-la-ciudad-de-buenos-aires" class="level4">
+<h4 class="anchored" data-anchor-id="rq2cuál-es-la-utilización-de-la-paleta-de-colores-en-las-publicidades-de-la-ciudad-de-buenos-aires">RQ2:¿Cuál es la utilización de la paleta de colores en las publicidades de la Ciudad de Buenos Aires?</h4>
+<p>Distribución de escala cromática utilizada por las publicidades en razón de la categoría <code>Productos</code></p>
 <div class="cell">
 <div class="cell-output-display">
 <p><img src="Training-and-exploration_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 <div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"RColorBrewer"</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">display.brewer.pal</span>(<span class="at">n =</span> <span class="dv">8</span>, <span class="at">name =</span> <span class="st">'RdBu'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <p><img src="Training-and-exploration_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid" width="672"></p>
 </div>

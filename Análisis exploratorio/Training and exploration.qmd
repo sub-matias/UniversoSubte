@@ -13,6 +13,7 @@ theme_set(
 )
 library(googlesheets4)
 library(kableExtra)
+library(RColorBrewer)
 ```
 
 #### Acceso a los datos
@@ -46,13 +47,16 @@ subte %>%
 Cantidad de publicidades con presencia efectiva en el sistema subterráneo dentro de la base de datos:
 
 ```{r, echo=FALSE}
+#Timelines
 subte %>%
-  group_by(Periodo) %>%
+  group_by(Year) %>%
   tally() %>%
-  ggplot(aes(x=Periodo, y=n))+
-  geom_col(fill="#28806E")+
-  ylab("Total Publicidades")+
-  xlab("Años")
+  ggplot(aes(x=Year,y=n))+
+  geom_line()+
+  geom_point(size=3)+
+  geom_point(size=2,color="white")+
+  xlab("Año")+
+  ylab("Publicidades")
 ```
 
 ```{r, echo=FALSE}
@@ -85,7 +89,7 @@ subte %>%
 
 Es apreciable la abundancia de material posible de recolectar por sobre la Línea B de Subte.
 
-#### Orientación temporal
+#### RQ1: ¿Cómo es representado el tiempo en las publicidades gráficas del Subte?
 
 Dados los parámetros arbitrarios de la base de datos, es interés abordar la variable de `orientación`
 
@@ -99,43 +103,40 @@ subte %>%
   group_by(Orientacion) %>%
   tally() %>%
   ggplot(aes(x=n, y=Orientacion))+
-  geom_col(fill="#28806E")+
-  xlab("Publicidades")
+  geom_col(fill="#4D5382")+
+  xlab("Publicidades")+
+  ylab("Orientación temporal")
 ```
 
 Si bien la cantidad de publicidades en `subte` es escasa, verifica una hipótesis vista en los antecedentes teóricos de la tesina acerca de la actividad publicitaria occidental:
 
 💡 Existe la tendencia publicitaria a referirse al presente, aunque existen aquellas que refieren al futuro o al pasado.
 
-#### Cromática y productos
+```{r, echo=FALSE}
+subte %>%
+  group_by(Orientacion, Producto) %>%
+  tally() %>%
+  ggplot(aes(x=Producto,y=Orientacion))+
+  geom_raster(fill="#4D5382")+
+  ggtitle("Uso del tiempo por producto")
+```
+
+#### RQ2:¿Cuál es la utilización de la paleta de colores en las publicidades de la Ciudad de Buenos Aires?
 
 Distribución de escala cromática utilizada por las publicidades en razón de la categoría `Productos`
 
-```{r}
+```{r, echo=FALSE}
 subte %>%
   group_by(Cromatica, Producto) %>%
   tally() %>%
   ggplot(aes(x=Producto,y=n,fill=Cromatica))+
   geom_col()+
+  scale_fill_manual(values = c(Frío="#658e96",Cálido="#fe6d73"))+
+  ggtitle("Escala")+
   ylab("Publicidades")+
   xlab("Producto comercializado")
 ```
 
 ```{r, echo=FALSE}
-# Ensayando algunos parámetros modificados y otro estilo de cargada de datos a la que precede
-  
-ggplot(data = subte)+geom_bar(aes(y = Cromatica),            width = 0.3,fill='tomato2')+theme_test()
-```
-
-```{r, echo=FALSE}
-#Timelines
-subte %>%
-  group_by(Year) %>%
-  tally() %>%
-  ggplot(aes(x=Year,y=n))+
-  geom_line()+
-  geom_point(size=3)+
-  geom_point(size=2,color="white")+
-  xlab("Año")+
-  ylab("Publicidades")
+display.brewer.pal(n = 8, name = 'RdBu')
 ```
