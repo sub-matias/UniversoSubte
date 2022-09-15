@@ -56,7 +56,8 @@ subte %>%
   geom_point(size=3)+
   geom_point(size=2,color="white")+
   xlab("Año")+
-  ylab("Publicidades")
+  ylab("Publicidades")+
+  ggtitle("Distribución temporal")
 ```
 
 ```{r, echo=FALSE}
@@ -76,15 +77,16 @@ Es factible observar que la primera etapa de la recolección de publicidades est
 Distribución de las publicidades en relación a la línea de subterráneo en la cual han manifestado su presencia
 
 ```{r, echo=FALSE}
-#HEX Buenos Aires Subway
+#add hex
 subte %>%
   group_by(Linea, Periodo) %>%
   tally() %>%
-  ggplot(aes(x=Periodo,y=n,fill = Linea))+
+  ggplot(aes(x=Periodo,y=n,fill=Linea))+
   geom_col()+
-  scale_fill_manual(values = c(A="#339BBB",B="#C63C3C",D="#359041"))+
+   scale_fill_manual(values = c(A="#339BBB",B="#C63C3C",D="#359041",H="#F8C301"))+
   xlab("Años")+
-  ylab("Publicidades")
+  ylab("Publicidades")+
+  ggtitle("Distribución subterránea")
 ```
 
 Es apreciable la abundancia de material posible de recolectar por sobre la Línea B de Subte.
@@ -105,7 +107,8 @@ subte %>%
   ggplot(aes(x=n, y=Orientacion))+
   geom_col(fill="#4D5382")+
   xlab("Publicidades")+
-  ylab("Orientación temporal")
+  ylab("Orientación")+
+  ggtitle("Distribución de representación temporal")
 ```
 
 Si bien la cantidad de publicidades en `subte` es escasa, verifica una hipótesis vista en los antecedentes teóricos de la tesina acerca de la actividad publicitaria occidental:
@@ -118,7 +121,7 @@ subte %>%
   tally() %>%
   ggplot(aes(x=Producto,y=Orientacion))+
   geom_raster(fill="#4D5382")+
-  ggtitle("Uso del tiempo por producto")
+  ggtitle("Uso del tiempo según producto")
 ```
 
 #### RQ2:¿Cuál es la utilización de la paleta de colores en las publicidades de la Ciudad de Buenos Aires?
@@ -136,6 +139,10 @@ subte %>%
   ylab("Publicidades")+
   xlab("Producto comercializado")
 ```
+
+#### RQ3: HEX Publicitario
+
+Ensayo de representación:
 
 ```{r, echo=FALSE}
 display.brewer.pal(n = 8, name = 'RdBu')
