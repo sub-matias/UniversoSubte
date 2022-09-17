@@ -7,3 +7,6 @@ Los datos son construídos a través de las técnicas de la arqueología digital
 
 > Nota: La base de datos está diseñada para presentar el proceso de la dimensión cuantitativa en la investigación universitaria referida con el fin de validar tanto los resultados obtenidos como demostrar el trabajo realizado.
 
+## Área de publicidades
+![subtepass9](https://user-images.githubusercontent.com/63526272/190859277-4857af99-48ad-47f5-8ad5-80100e4c2e10.png)
+> [SubPublicidades](https://drive.google.com/drive/folders/11TjJIOCrAlHWuViRSQplV9tm2Hl155bs?usp=sharing)
