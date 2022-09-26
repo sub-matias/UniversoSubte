@@ -1,0 +1,95 @@
+---
+title: "Conexion con googledrive"
+author: "Aleksander Dietrichson"
+format: html
+editor: visual
+---
+
+## Packete googledrive
+
+```{r}
+if(!require(googledrive)){
+  install.packages("googledrive")
+  require(googledrive)
+}
+library(magick)
+
+```
+## Conexion
+
+```{r}
+  # Cuando aparezca el dialogo de google, no olvides tildar la opcion de leer, escribir etc. 
+  # Si no se autoriza solo tendra acceso a la direccion de mail, lo cual no nos sirve mucho.
+1
+  drive_ls("SubPublicidades")
+```
+
+## Tambien tiene opcion de hacerlo recursivo
+
+```{r}
+drive_ls("SubPublicidades", recursive = TRUE)
+```
+
+Pongamoslo en una variable para verlo de cerca:
+
+```{r}
+mis_archivos <- drive_ls("SubPublicidades", recursive = TRUE)
+mis_archivos
+```
+
+```{r}
+mis_archivos$id[1]
+```
+
+
+
+## Bajar un archivo especifico
+
+```{r}
+#por id
+drive_get( id = mis_archivos$id[1])
+
+```
+
+```{r}
+tmp <- drive_get( id = mis_archivos$id[1])
+str(tmp)
+```
+
+```{r}
+drive_download(tmp, path = "my_file.png") 
+```
+
+
+```{r}
+my_image <- image_read("my_file.png")
+```
+
+```{r}
+plot(my_image)
+```
+
+Tuvimos problemas con los jpg, asi que intentamos uno
+
+```{r}
+tmp <- drive_get(id="17J0UJpAyXlZa-mLnjipczZ3mvqGUAz_R")
+drive_download(tmp, path = "tmp.jpg", overwrite = TRUE )#vamos a reciclar aca
+
+```
+
+```{r}
+my_image <- image_read("tmp.jpg")
+plot(my_image)
+```
+
+### Qué resolvimos
+
+* Concectarnos al google-drive desde R
+* Listar y acceder al contendido del mismo
+* Comprobar que podemos leer y por ende analizar una imagen de jpg.
+
+### Para seguir
+
+* Armar funciones generalizados para leer todos las imagenes y analizarlas
+* Determinar como actuar en el caso de una imagen con mucho borde (como es el caso de la imagen que antecede)
+
