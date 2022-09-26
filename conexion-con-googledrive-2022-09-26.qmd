@@ -33,7 +33,7 @@ drive_ls("SubPublicidades", recursive = TRUE)
 Pongamoslo en una variable para verlo de cerca:
 
 ```{r}
-mis_archivos <- drive_ls("SubPublicidades", recursive = TRUE)
+mis_archivos <- drive_ls("SubPublicidades")
 mis_archivos
 ```
 
