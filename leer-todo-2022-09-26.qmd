@@ -63,3 +63,7 @@ for(i in 1:nrow(my_data)){
 
 ```
 
+```{r}
+write_rds(my_data, "./tmp/file_info.rds")
+```
+

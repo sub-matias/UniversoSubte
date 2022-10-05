@@ -107,7 +107,7 @@ ggplot(data.frame(x=0,y=0),aes(x,y))+
   geom_point(size=10, color = "#0000FFFF")
 ```
 
-### Conclusion 
+### Conclusion
 
 Por inspeccion ocular entramos que los codigos vinen en R-G-B con hexadecimal.
 

@@ -84,7 +84,7 @@ plot(my_image)
 
 ### Qué resolvimos
 
-* Concectarnos al google-drive desde R
+* Conectarnos al google-drive desde R
 * Listar y acceder al contendido del mismo
 * Comprobar que podemos leer y por ende analizar una imagen de jpg.
 
