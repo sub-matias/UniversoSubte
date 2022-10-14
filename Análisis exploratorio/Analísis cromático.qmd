@@ -1,0 +1,230 @@
+---
+title: "Ensayo"
+author: "Matias"
+format: html
+editor: visual
+---
+
+## Ensayo
+
+```{r}
+library(tidyverse)
+library(magick)
+library(rsvg)
+library(googledrive)
+root_path <- "SubPublicidades"
+```
+
+##### H1: Acceso a las imagenes desde GDrive
+
+```{r}
+drive_ls("SubPublicidades")
+```
+
+```{r}
+drive_ls("SubPublicidades", recursive = TRUE)
+```
+
+```{r}
+mis_archivos <- drive_ls("SubPublicidades", recursive = TRUE)
+mis_archivos
+```
+
+##### Selección de fotografías mediante ID
+
+```{r}
+mis_archivos$id[14]
+```
+
+```{r}
+drive_get( id = mis_archivos$id[14])
+```
+
+```{r}
+#Generamos un archivo temporal para observar los datos otorgados por Google según la fotografía
+tmp <- drive_get( id = mis_archivos$id[14])
+str(tmp)
+```
+
+```{r}
+#Se realiza la descarga de la fotografía
+drive_download(tmp, path = "my_file.png")
+```
+
+```{r}
+my_image <- image_read("my_file.png")
+```
+
+```{r}
+#Correcta conexión y descarga
+plot(my_image)
+```
+
+```{r}
+my_root <- drive_ls(root_path)
+str(my_root)
+```
+
+```{r}
+my_root
+```
+
+##### H2: Extracción de las subcarpetas en GDrive
+
+Existen múltiples subcarpetas con un mismo años bajo distintas Líneas de Subte.
+
+```{r}
+my_data <- data.frame()
+for(i in 1:nrow(my_root)){
+  
+  tmp <- drive_ls(my_root[i,])
+  for(j in 1:nrow(tmp)){
+    tmp2 <- drive_ls(tmp[j,])
+    my_data <- my_data %>% 
+      bind_rows(data.frame(
+        Linea = my_root[[i,'name']],
+        periodo = tmp[[j,'name']],
+        image_name = tmp2$name,
+        id_image = tmp2$id))
+  }
+}
+my_data
+```
+
+##### Bajada de los archivos y guardado local
+
+```{r}
+my_data$filename <-
+  paste0(my_data$Linea,"_",my_data$periodo,"_",my_data$image_name)
+dir.create("tmp")
+for(i in 1:nrow(my_data)){
+  drive_download(as_id(my_data$id_image[i]), path = paste0("tmp/",my_data$filename[i]))
+}
+```
+
+##### H3: Análisis
+
+```{r}
+#Es necesario evocar la imagen
+jorgitotemp <- image_read("../project/tmp/Subte A_2017_Jorgito 2.jpeg") 
+```
+
+```{r}
+#Creación del archivo para la lectura de los datos
+write_rds(my_data,"./tmp/file_info.rds")
+```
+
+```{r}
+my_data <- read_rds("tmp/file_info.rds")
+```
+
+##### Escritura manual de las funciones y la toma de fotografías
+
+```{r}
+my_image <- image_read(paste0("./tmp/",my_data$filename[33]))
+```
+
+1° /
+
+```{r}
+mis_colores <- my_image %>%
+  as.raster() %>%
+  as.matrix() %>%
+  as.vector()
+```
+
+```{r}
+head(mis_colores)
+```
+
+```{r}
+colores_df <- data.frame(
+  R = str_sub(mis_colores,2,3),
+  G = str_sub(mis_colores,4,5),
+  B = str_sub(mis_colores,6,7),
+  A = str_sub(mis_colores,8,9)
+)
+```
+
+2° / HEX a NUM
+
+```{r}
+hex_to_num <- function( hex ){
+ paste0("0x", hex) %>% 
+    as.numeric()
+}
+```
+
+```{r}
+colores_df %>% 
+  mutate(
+    R=hex_to_num(R),
+    G=hex_to_num(G),
+    B=hex_to_num(B),
+    A=hex_to_num(A)
+  ) -> tmp
+```
+
+```{r}
+#Eliminamos A en razón de que no es de utilidad para nuestro análisis
+tmp$A <- NULL
+```
+
+```{r}
+#Se toma el nombre del color con valor más alto en cada fila
+colnames(tmp)[max.col(tmp)] %>% 
+  head(10)
+```
+
+```{r}
+df_analysis <- data.frame(color = colnames(tmp)[max.col(tmp)] )
+```
+
+```{r}
+df_analysis %>% 
+  group_by(color) %>% 
+  count()
+```
+
+```{r}
+my_image %>% plot()
+```
+
+Creación de la función para adoptar otra fotografía de más utilidad
+
+```{r}
+analizar_foto <- function(filename){
+  my_image <- image_read(filename)
+  mis_colores <- my_image %>% 
+    as.raster() %>% 
+    as.matrix() %>% 
+    as.vector() 
+  colores_df <- data.frame(
+  R = str_sub(mis_colores,2,3),
+  G = str_sub(mis_colores,4,5),
+  B = str_sub(mis_colores,6,7)
+)
+  colores_df %>%
+    mutate(
+      R=hex_to_num(R),
+      G=hex_to_num(G),
+      B=hex_to_num(B)
+    ) -> tmp
+   df_analysis <- data.frame(color = colnames(tmp)[max.col(tmp)] )
+  df_analysis %>%
+    group_by(color) %>%
+    count()
+  
+}
+```
+
+```{r}
+paste0("./tmp/",my_data$filename[55]) %>% 
+analizar_foto()
+```
+
+```{r}
+paste0("./tmp/",my_data$filename[55]) %>% 
+  image_read() %>% 
+  plot()
+```
