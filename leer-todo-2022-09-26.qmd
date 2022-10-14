@@ -1,0 +1,69 @@
+---
+title: "Leer todo"
+format: html
+editor: visual
+---
+
+## Objetivo
+
+-   Escribir el codigo necesario para traer y analizar las imagenes en el google-drive
+
+## Inicio 
+
+```{r}
+#librerias necesarios
+library(googledrive)
+library(magick)
+library(tidyverse)
+root_path <- "SubPublicidades"
+```
+
+```{r}
+my_root <- drive_ls(root_path)
+str(my_root)
+
+```
+
+```{r}
+my_root
+```
+
+## Extraer subcarpetas de las lineas
+
+```{r}
+my_data <- data.frame()
+for(i in 1:nrow(my_root)){
+  
+  tmp <- drive_ls(my_root[i,])
+  for(j in 1:nrow(tmp)){
+    tmp2 <- drive_ls(tmp[j,])
+    my_data <- my_data %>% 
+      bind_rows(data.frame(
+        Linea = my_root[[i,'name']],
+        periodo = tmp[[j,'name']],
+        image_name = tmp2$name,
+        id_image = tmp2$id))
+  }
+}
+
+my_data
+```
+
+
+### Bajar los archivos y guardarlos localmente
+
+```{r}
+
+my_data$filename <- paste0(my_data$Linea,"_",my_data$periodo,"_",my_data$image_name)
+
+dir.create("tmp")
+for(i in 1:nrow(my_data)){
+  drive_download(as_id(my_data$id_image[i]), path = paste0("tmp/",my_data$filename[i]))
+}
+
+```
+
+```{r}
+write_rds(my_data, "./tmp/file_info.rds")
+```
+

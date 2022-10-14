@@ -1,0 +1,169 @@
+---
+title: "Analisis de imagenes"
+author: "Aleksander Dietrichson"
+format: html
+editor: visual
+---
+
+## Paquetes usados
+
+```{r setup, include=FALSE}
+if(!require(magick)){
+  install.packages("magick")
+  require(magick)
+}
+if(!require(rsvg)){
+  install.packages("rsvg")
+  require(rsvg)
+}
+library(tidyverse)
+```
+
+Acceder a alguna imagen desde google-drive
+
+```{r}
+tmp1 <- image_read("../project/Movistar.png")
+```
+
+```{r}
+tmp1
+```
+
+```{r}
+as.raster(tmp1) %>% head(10)
+```
+
+Codigo por ejemplo
+
+#1e1e1eff
+
+\# \| 1e \| 1e \| 1e \| ff
+
+```{r}
+ggplot(data.frame(x=0,y=0),aes(x,y))+
+  geom_point(size=10, color = "#7e0b1cff")
+```
+
+## Encontrar color predominante
+
+```{r}
+tmp1 %>% 
+  as.raster() %>% 
+  as.matrix() %>% 
+  as.vector() %>% 
+  head()
+```
+
+```{r}
+mis_colores <- tmp1 %>% 
+  as.raster() %>% 
+  as.matrix() %>% 
+  as.vector() 
+```
+
+```{r}
+mis_colores_df <- data.frame(color = mis_colores)
+```
+
+```{r}
+mis_colores_df %>% 
+  group_by(color) %>% 
+  tally(sort = TRUE) %>% 
+  head(10)
+```
+
+## Visualizamos
+
+```{r}
+mis_colores_df %>% 
+  group_by(color) %>% 
+  tally(sort = TRUE) %>% 
+  head(100)->tmp
+tmp%>% 
+  ggplot(aes(x=color, y=n))+
+  geom_col(fill=tmp$color)
+```
+
+## Segundo intento
+
+Algorithmo propuesto:
+
+1.  Desconstruir los codigos de colores en cuatro columnas
+2.  Redondear las columnas
+3.  Trabajar sobre el redondeo
+
+```{r}
+ggplot(data.frame(x=0,y=0),aes(x,y))+
+  geom_point(size=10, color = "#FF0000")
+```
+
+```{r}
+ggplot(data.frame(x=0,y=0),aes(x,y))+
+  geom_point(size=10, color = "#00FF00")
+```
+
+```{r}
+ggplot(data.frame(x=0,y=0),aes(x,y))+
+  geom_point(size=10, color = "#0000FFFF")
+```
+
+### Conclusion
+
+Por inspeccion ocular entramos que los codigos vinen en R-G-B con hexadecimal.
+
+Por tanto generemos cuatro columnas con un color cada una, mas el cuarto parametro que endentemos corresponde a la transparencia o valor alpha.
+
+```{r}
+
+my_data <- data.frame(
+  R = str_sub(mis_colores,2,3),
+  G = str_sub(mis_colores,4,5),
+  B = str_sub(mis_colores,6,7),
+  A = str_sub(mis_colores,8,9)
+)
+
+#verifiquemos 
+identical(
+  paste0("#",
+       my_data$R,
+       my_data$G,
+       my_data$B,
+       my_data$A
+       ),
+  mis_colores
+)
+
+```
+
+### Redondeo
+
+```{r}
+my_data %>% 
+  mutate(
+    Red = stringr::str_sub(R,1,1) %>% stringr::str_c("0"),
+    Green = stringr::str_sub(G,1,1) %>% stringr::str_c("0"),
+    Blue = stringr::str_sub(B,1,1) %>% stringr::str_c("0"),
+    Alpha = stringr::str_sub(A,1,1) %>% stringr::str_c("0")
+      ) -> my_data
+```
+
+### Color de recondeo
+
+```{r}
+my_data <- my_data %>% 
+  mutate(color_nuevo = paste0("#",Red,Green,Blue))
+```
+
+```{r}
+my_data %>% 
+  group_by(color_nuevo) %>% 
+  tally(sort=TRUE) %>% 
+  head(30) -> tmp
+
+```
+
+```{r}
+tmp %>% 
+  ggplot(aes(color_nuevo,n))+
+  geom_col(fill = tmp$color_nuevo)
+```

@@ -1,0 +1,13 @@
+---
+title: "Abstract Conferencia"
+format: html
+editor: visual
+---
+
+## Abstract (Poner titulo)
+
+El presente trabajo presenta resultados preliminares de un estudio que corresponde a la tesis....
+
+Los datos corresponden a fotos tomados de varias lineas del subte... asi como alguna documentacion historica....
+
+Se demostrará el uso de R y tecnologías de inteligencia artificial para el desarrollo de una metodolgía que permite clasificar el corpus de manera automatizada y objetiva. Asímismo se presentará un analisis descriptivo de los datos preliminares.
