@@ -1,0 +1,116 @@
+---
+title: "Notas 1710"
+author: "Matias"
+format: html
+editor: visual
+---
+
+```{r}
+library(tidyverse)
+library(magick)
+library(googledrive)
+library(rsvg)
+source("analizar-foto.R")
+source("visualizar-colores.R")
+root_path <- "SubPublicidades"
+```
+
+## Test de funciones, combinaciones y usos
+
+**Primera versión de visualización de color dominante**
+
+```{r}
+ggplot(data.frame(x=0,y=0),aes(x,y))+
+  geom_point(size=10, color = "#7e0b1cff")
+```
+
+Se selecciona una publicidad al azar para entrenar:
+
+```{r}
+#Creación de un data frame
+SubtePassFB<- image_read("tmp/Subte B_2004_Pensá-Rápido-Pensá-FiberTel---Serial-M36.jpg")
+```
+
+```{r}
+SubtePassFB
+```
+
+```{r}
+#Consultar acerca de la extensión de los datos evocados
+as.raster(SubtePassFB) %>% head(10)
+```
+
+```{r}
+SubtePassFB %>%
+  as.raster() %>% 
+  as.matrix() %>% 
+  as.vector() %>% 
+  head(10)
+```
+
+```{r}
+subtecolores <- SubtePassFB %>% 
+  as.raster() %>% 
+  as.matrix() %>% 
+  as.vector()
+```
+
+```{r}
+mis_colores_df <- data.frame(color = subtecolores)
+```
+
+```{r}
+mis_colores_df %>% 
+  group_by(color) %>% 
+  tally(sort = TRUE) %>% 
+  head(10)
+```
+
+```{r}
+my_data <- data.frame(
+  R = str_sub(subtecolores,2,3),
+  G = str_sub(subtecolores,4,5),
+  B = str_sub(subtecolores,6,7),
+  A = str_sub(subtecolores,8,9)
+)
+#verifiquemos 
+identical(
+  paste0("#",
+       my_data$R,
+       my_data$G,
+       my_data$B,
+       my_data$A
+       ),
+  subtecolores
+)
+```
+
+```{r}
+my_data %>% 
+  mutate(
+    Red = stringr::str_sub(R,1,1) %>% stringr::str_c("0"),
+    Green = stringr::str_sub(G,1,1) %>% stringr::str_c("0"),
+    Blue = stringr::str_sub(B,1,1) %>% stringr::str_c("0"),
+    Alpha = stringr::str_sub(A,1,1) %>% stringr::str_c("0")
+      ) -> my_data
+```
+
+```{r}
+my_data <- my_data %>% 
+  mutate(color_nuevo = paste0("#",Red,Green,Blue))
+```
+
+```{r}
+my_data %>% 
+  group_by(color_nuevo) %>% 
+  tally(sort=TRUE) %>% 
+  head(30) -> tmp
+```
+
+```{r}
+tmp %>% 
+  ggplot(aes(color_nuevo,n))+
+  geom_col(fill = tmp$color_nuevo)
+```
+
+Es posible trabajar sobre una nueva función que presente a los colores dominantes de las fotografías.
