@@ -1,0 +1,29 @@
+---
+title: "Ensayo 1410"
+author: "Matias"
+format: html
+editor: visual
+---
+
+## Test
+
+```{r}
+library(tidyverse)
+library(magick)
+source("analizar-foto.R")
+```
+
+```{r}
+my_filename <- "tmp/Subte B_2004_Fibertel---Vas-Más-Rápido---Serial-M35.jpg"
+analizar_foto(my_filename)
+```
+
+```{r}
+my_filename <- "tmp/Subte B_2004_Pensá-Rápido-Pensá-FiberTel---Serial-M36.jpg"
+analizar_foto(my_filename)
+```
+
+```{r}
+my_filename <- "tmp/Subte B_2001_DiscoVirtual.jpg"
+analizar_foto(my_filename)
+```
