@@ -1,0 +1,172 @@
+---
+title: "Notas de Clase 05-10-2022"
+format: html
+editor: visual
+---
+
+## Proposito
+
+-   Trabajar sobre archivos locales
+
+-   Intentar un algoritmo para determinar prevalencia de color en una foto
+
+-   Volcarlo en una funcción
+
+-   Probar con algunas a ver que nos parece
+
+```{r}
+#! setup
+#! include: false
+library(magick)
+library(tidyverse)
+```
+
+```{r}
+# Los archivos locales estan en ./tmp
+# Y tenemos metadata en file_info.rds en la misma carpeta
+my_data <- read_rds("tmp/file_info.rds")
+```
+
+## Elejir un ejemplo - 42
+
+```{r}
+my_image <- image_read(paste0("./tmp/",my_data$filename[42]))
+```
+
+Analizarlo
+
+```{r}
+mis_colores <- my_image %>% 
+  as.raster() %>% 
+  as.matrix() %>% 
+  as.vector() 
+```
+
+```{r}
+head(mis_colores)
+```
+
+```{r}
+colores_df <- data.frame(
+  R = str_sub(mis_colores,2,3),
+  G = str_sub(mis_colores,4,5),
+  B = str_sub(mis_colores,6,7),
+  A = str_sub(mis_colores,8,9)
+)
+```
+
+Para que sea mas sencillo para nosotros convertamos el hexadecimal en numerico. Para ello vamos a armar una funcion.
+
+```{r}
+hex_to_num <- function( hex ){
+  # Aca falta check de validez del input
+ paste0("0x", hex) %>% 
+    as.numeric()
+}
+```
+
+Vamos a aplicar esta funcion a nuestros datos
+
+```{r}
+colores_df %>% 
+  mutate(
+    R=hex_to_num(R),
+    G=hex_to_num(G),
+    B=hex_to_num(B),
+    A=hex_to_num(A)
+  ) -> tmp
+```
+
+Vamos a eliminar por ahora el ALPHA porque no lo vamos a analizar.
+
+```{r}
+tmp$A <- NULL
+```
+
+Con ello un algoritmo muy basico seria tomar el nombre del color con valor mas alto para cada fila.
+
+```{r}
+colnames(tmp)[max.col(tmp)] %>% 
+  head(10)
+```
+
+```{r}
+df_analysis <- data.frame(color = colnames(tmp)[max.col(tmp)] )
+```
+
+```{r}
+df_analysis %>% 
+  group_by(color) %>% 
+  count()
+```
+
+## Verificamos
+
+```{r}
+my_image %>% plot()
+```
+
+### Armamos funcion
+
+```{r}
+analizar_foto <- function(filename){ #Analisis crudo e inicial.
+  my_image <- image_read(filename)
+  mis_colores <- my_image %>% 
+    as.raster() %>% 
+    as.matrix() %>% 
+    as.vector() 
+  colores_df <- data.frame(
+  R = str_sub(mis_colores,2,3),
+  G = str_sub(mis_colores,4,5),
+  B = str_sub(mis_colores,6,7)
+)
+  colores_df %>%
+    mutate(
+      R=hex_to_num(R),
+      G=hex_to_num(G),
+      B=hex_to_num(B)
+    ) -> tmp
+   df_analysis <- data.frame(color = colnames(tmp)[max.col(tmp)] )
+  df_analysis %>%
+    group_by(color) %>%
+    count()
+  
+}
+```
+
+### Probar funcion con la imagen que tenemos
+
+```{r}
+paste0("./tmp/",my_data$filename[42]) %>% 
+analizar_foto()
+```
+
+```{r}
+paste0("./tmp/",my_data$filename[41]) %>% 
+analizar_foto()
+```
+```{r}
+paste0("./tmp/",my_data$filename[41]) %>% 
+  image_read() %>% 
+  plot()
+```
+
+## Conclusion
+
+Crudo analisis, hay que buscar la manera de agregar matices
+
+### Tarea:
+
+* Extraer las funciones del documento
+* Agregarlos a un documento .R
+* Reutilizarlo en otro documento qmd
+
+
+### Nota
+
+Se usa `source` para incluir codigo de otros archivos
+
+```{r}
+source("useless-function.R")
+mi_funcion_inutil()
+```
