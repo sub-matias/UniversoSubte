@@ -1,0 +1,30 @@
+---
+title: "Notas de clase Octubre 18 2022"
+format: html
+editor: visual
+---
+
+```{r setup}
+#| include: false
+library(tidyverse)
+library(magick)
+source("analizar-foto.R")
+source("foto-a-dataframe.R")
+```
+
+## Eligir una foto random
+
+```{r}
+mis_fotos <- read_rds("./tmp/file_info.rds")
+mi_filename <- paste0("tmp/",mis_fotos$filename[12])
+mi_filename
+file.exists(mi_filename)
+```
+
+```{r}
+analizar_foto(mi_filename)
+```
+
+```{r}
+
+```
