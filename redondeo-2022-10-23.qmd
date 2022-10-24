@@ -1,0 +1,193 @@
+---
+title: "Redondeo"
+format: html
+editor: visual
+---
+
+## Redondear Colores
+
+```{r include=FALSE}
+library(magick)
+library(tidyverse)
+source("./convert-to-df.R")
+my_image <- image_read("tmp/Subte A_2018_Flybondi.jpeg")
+plot(my_image)
+```
+
+
+Queremos reducir el numero de colores a algo mas manejable.
+
+```{r}
+my_image2 <- image_quantize(my_image,
+                            max = 8)
+plot(my_image2)
+```
+
+
+
+```{r}
+to_RGB_df(my_image2) -> my_data
+```
+
+
+Entonces:
+
+```{r}
+
+add_hex_color_column <- function(in_data){
+  in_data %>% 
+  mutate(hex_color = rgb(R,G,B,maxColorValue = 255))
+}
+
+my_data <- my_data %>% 
+  add_hex_color_column()
+my_data %>% 
+  head()
+```
+
+
+Hacemos escalas
+
+
+```{r}
+
+create_chromatics_color_scale <- function(in_data){
+ my_color_codes <- in_data$hex_color %>% unique() 
+  names(my_color_codes) <- my_color_codes
+  my_color_codes
+}
+
+library(ggplot2)
+my_data %>% 
+  group_by(hex_color) %>% 
+  count() %>% 
+  ggplot(aes(x=hex_color,y=n,fill=hex_color))+
+  geom_col()+ 
+  scale_fill_manual(values = create_chromatics_color_scale(my_data))+
+   theme(legend.position="none")
+  
+```
+## Con escala estandardizada
+
+```{r}
+source("colores-primarios.R")
+my_data2 <- to_RGB_df(my_image)
+
+cp <- colores_primarios
+
+my_data2$color_name <- 
+  purrr::pmap(my_data2,~{
+    dist_vec <- sqrt((..1-cp$R)^2+(..2-cp$G)^2+(..3-cp$B)^2)
+    res <- which.min(dist_vec)
+    cp$color_name[[res]] 
+    # res
+  }) %>% unlist()
+
+my_data2 <- my_data2 %>% 
+  left_join(colores_primarios %>% select(color_name, hex))
+
+
+```
+
+
+
+
+Visualizamos
+
+```{r}
+my_color_scale <- colores_primarios$hex
+names(my_color_scale) <- colores_primarios$color_name
+my_data2 %>% 
+  group_by(color_name,hex) %>% 
+  count() %>% 
+  ggplot(aes(x=color_name,y=n,fill=color_name))+
+  geom_col()+
+  scale_fill_manual(values = my_color_scale)+
+   theme(legend.position="none")
+```
+
+Parece que no funciona!
+
+## Funcion de redondeo flexible
+
+```{r}
+round_to_any <- function (x, accuracy, f = round) 
+{
+  f(x/accuracy) * accuracy
+}
+
+round_RGB_df <- function(df, accuracy, f = round, max_val = 255){
+  df %>% 
+    mutate(
+      R = round_to_any(R, accuracy, f),
+      G = round_to_any(G, accuracy, f),
+      B = round_to_any(B, accuracy, f)
+    ) %>% 
+    mutate(
+      R = ifelse(R > max_val, max_val, R ),
+      G = ifelse(G > max_val, max_val, G ),
+      B = ifelse(B > max_val, max_val, B ),
+      )
+}
+
+my_data3 <- to_RGB_df(my_image)
+
+head(my_data3)
+```
+
+Miremos:
+```{r}
+my_data3 %>% 
+  round_RGB_df(accuracy = 5) %>% 
+  head()
+```
+
+OK armemos una funcion para probar diferentes niveles y visualizar
+
+```{r}
+redondeo_y_plot <- function(imagen, accuracy = 5){
+  tmp_df <- to_RGB_df(imagen) %>% 
+    round_RGB_df(accuracy = accuracy) %>% 
+    mutate(RGB = rgb(R,G,B, maxColorValue = 255))
+  #armemos escala
+  my_color_codes <- tmp_df$RGB %>% unique
+  names(my_color_codes) <- my_color_codes
+  tmp_df %>% 
+    group_by(RGB) %>% 
+    count() %>% 
+    ggplot(aes(x=RGB,y=n,fill=RGB))+
+    geom_col()+
+    scale_fill_manual(values = my_color_codes)+
+    theme(legend.position = "none")
+}
+```
+
+probemos
+
+```{r}
+redondeo_y_plot(my_image)
+```
+
+OK, muy finito, intentemos otro redondeo mas grueso
+
+```{r}
+redondeo_y_plot(my_image, accuracy = 50)
+```
+pareceria mas interesante...
+
+```{r}
+redondeo_y_plot(my_image, accuracy = 100)
+```
+```{r}
+redondeo_y_plot(my_image, accuracy = 64)
+```
+```{r}
+redondeo_y_plot(my_image, accuracy = 80)
+```
+```{r}
+redondeo_y_plot(my_image, accuracy = 128)
+```
+```{r}
+redondeo_y_plot(my_image, accuracy = 127)
+```
+
