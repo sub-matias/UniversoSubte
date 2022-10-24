@@ -1,0 +1,15 @@
+---
+title: "Notas de la clase de 24 de noviembre del 2022"
+format: html
+editor: visual
+---
+
+## Cargar todas las funciones de la capeta R
+
+```{r}
+my_files <- dir("R",full.names = TRUE)
+for(archivo in my_files){
+  source(archivo)
+  cat("Procesando:", archivo, "\n")
+}
+```
