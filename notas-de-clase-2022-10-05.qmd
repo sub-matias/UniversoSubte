@@ -145,6 +145,7 @@ analizar_foto()
 paste0("./tmp/",my_data$filename[41]) %>% 
 analizar_foto()
 ```
+
 ```{r}
 paste0("./tmp/",my_data$filename[41]) %>% 
   image_read() %>% 
@@ -157,10 +158,9 @@ Crudo analisis, hay que buscar la manera de agregar matices
 
 ### Tarea:
 
-* Extraer las funciones del documento
-* Agregarlos a un documento .R
-* Reutilizarlo en otro documento qmd
-
+-   Extraer las funciones del documento
+-   Agregarlos a un documento .R
+-   Reutilizarlo en otro documento qmd
 
 ### Nota
 
