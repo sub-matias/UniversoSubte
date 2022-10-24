@@ -1,0 +1,42 @@
+---
+title: "Notas de clase Octubre 18 2022"
+format: html
+editor: visual
+---
+
+```{r setup}
+#| include: false
+library(tidyverse)
+library(magick)
+source("analizar-foto.R")
+source("foto-a-dataframe.R")
+source("visualizar-colores.R")
+```
+
+## Iteracion 
+
+```{r}
+mis_fotos <- read_rds("./tmp/file_info.rds")
+mi_filename <- paste0("tmp/",mis_fotos$filename[12])
+
+```
+
+```{r}
+colores_barchart(mi_filename)
+mi_imagen <- magick::image_read(mi_filename)
+plot(mi_imagen)
+```
+
+```{r}
+#| results: asis
+#| echo: false 
+for(i in 1:10){
+  cat("  \n## Imagen ", i,"\n")
+  mi_filename <-mi_filename <- paste0("tmp/",mis_fotos$filename[i])
+  colores_barchart(mi_filename) %>% plot()
+  cat("\n\n")
+  mi_imagen <- magick::image_read(mi_filename)
+  plot(mi_imagen)
+  cat("\n\n")
+}
+```
