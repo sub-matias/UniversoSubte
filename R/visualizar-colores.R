@@ -1,5 +1,3 @@
-source("foto-a-dataframe.R")
-source("analizar-foto.R")
 colores_barchart <- function(filename){
   my_data <- analizar_foto(filename)
   

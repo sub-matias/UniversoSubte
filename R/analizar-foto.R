@@ -1,4 +1,4 @@
-source("foto-a-dataframe.R")
+
 analizar_foto <- function(filename){
   tmp <- foto_a_dataframe(filename = filename) %>% 
     select(R, B, G)
