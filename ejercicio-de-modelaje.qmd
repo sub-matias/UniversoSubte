@@ -1,0 +1,180 @@
+---
+title: "Ejercicio de Modelaje"
+format: html
+editor: visual
+---
+
+## Conectar los datos
+
+```{r}
+if(!require(googlesheets4)){
+  install.packages("googlesheets4")
+  require(googlesheets4)
+}
+library(googledrive)
+library(magick)
+
+my_files <- dir("R",full.names = TRUE)
+for(my_file in my_files){
+  source(my_file)
+}
+
+gs4_deauth()
+
+my_url <- "https://docs.google.com/spreadsheets/d/1SF5DDTEfbQFSNjvYKQnsQKdsBdE7oJeTywCk92pB7f8/edit?usp=sharing"
+
+my_url2 <- 'https://docs.google.com/spreadsheets/d/1SF5DDTEfbQFSNjvYKQnsQKdsBdE7oJeTywCk92pB7f8/edit#gid=1964221805'
+
+my_data <- googlesheets4::read_sheet(my_url2)
+```
+
+## Acceder los links
+
+De prueba: 
+
+```{r}
+dir.create("tmp2")
+setwd("tmp2")
+tmp_file <- drive_download(my_data$URL[2],overwrite = TRUE)
+my_image <- image_read(path =tmp_file$local_path)
+my_df <- to_RGB_df(my_image)
+my_df %>% 
+summarize(
+  Red = mean(R),
+  Green = mean(G),
+  Blue = mean(B),
+  Red_sd = sd(R),
+  Green_sd = sd(G),
+  Blue_sd = sd(B),
+  )
+
+```
+
+
+```{r}
+setwd("tmp2")
+my_data <- my_data %>% 
+  filter(!is.na(URL))
+my_new_data <- data.frame()
+index <- 1
+for(URL in my_data$URL){
+  index <- index +1
+  
+  cat(index, " Analizando: ", URL, "\n")
+  tmp_file <- drive_download(URL, overwrite = TRUE)
+  my_image <- image_read(path =tmp_file$local_path)
+  my_df <- to_RGB_df(my_image)
+  my_df %>% 
+    summarize(
+      Red = mean(R),
+      Green = mean(G),
+      Blue = mean(B),
+      Red_sd = sd(R),
+      Green_sd = sd(G),
+      Blue_sd = sd(B),
+    ) -> tmp
+  my_new_data <- rbind(my_new_data, tmp)
+}
+
+```
+```{r}
+my_data2 <- cbind(my_data,my_new_data)
+```
+
+```{r}
+my_data2
+```
+# Hacer backup
+
+```{r}
+write_rds(my_data2,"./data/fotos_con_analysis_de_colores.rds")
+```
+
+
+# Modelar.
+
+```{r}
+my_data2 %>% 
+  mutate(Cromatica = as.factor(Cromatica)) %>% 
+  glm(Cromatica ~ (Red + Green + Blue)^2,family = "binomial", data=.)-> my_model1
+```
+
+
+```{r}
+my_data2 %>% 
+  mutate(Cromatica = as.factor(Cromatica)) %>% 
+  glm(Cromatica ~ Red + Green + Blue,family = "binomial", data=.)-> my_model2
+summary(my_model2)
+```
+
+```{r}
+predict(my_model2,type = "response") -> porcentajes
+```
+
+
+```{r}
+my_data2$prediccion <- porcentajes
+```
+
+
+# Evaluar
+
+```{r}
+my_data2 <- my_data2 %>% 
+  mutate(pred_dura = ifelse(prediccion>.5, "Frío", "Cálido"))
+```
+
+```{r}
+sum(my_data2$Cromatica == my_data2$pred_dura)/nrow(my_data2)
+```
+```{r}
+my_data3 <- my_data2
+predict(my_model1,type = "response") -> porcentajes
+
+my_data3$prediccion <- porcentajes
+
+my_data3 <- my_data3 %>% 
+  mutate(pred_dura = ifelse(prediccion>.5, "Frío", "Cálido"))
+
+sum(my_data3$Cromatica == my_data3$pred_dura)/nrow(my_data3)
+
+```
+
+## Mas interacciones
+```{r}
+my_data4 <- my_data2
+my_data4 %>% 
+  mutate(Cromatica = as.factor(Cromatica)) %>% 
+  glm(Cromatica ~ (Red + Green + Blue)^3,family = "binomial", data=.)-> my_model4
+summary(my_model4)
+```
+
+
+```{r}
+predict(my_model4,type = "response") -> porcentajes
+
+my_data4$prediccion <- porcentajes
+
+my_data4 <- my_data4 %>% 
+  mutate(pred_dura = ifelse(prediccion>.5, "Frío", "Cálido"))
+
+sum(my_data4$Cromatica == my_data4$pred_dura)/nrow(my_data4)
+```
+
+```{r}
+coef(my_model4)
+```
+
+$$
+
+\hat{Y} \sim R + G + B + \epsilon
+$$
+$$
+\hat{Y} = [Calido|Frio]
+$$
+
+
+$$
+
+Calido|Frio \sim R + G + B
+$$
