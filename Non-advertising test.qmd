@@ -24,15 +24,16 @@ root_path <- "SubPublicidades"
 新潟の春 <- image_read("Non-advertising test/新潟の春.jpg")
 上信電鉄下仁田ー千平 <- image_read("Non-advertising test/上信電鉄　下仁田ー千平.jpg")
 美しい窓 <- image_read("Non-advertising test/美しい窓.jpg")
+大大阪 <- image_read("Non-advertising test/大大阪.jpg")
 ```
 
 ```{r}
-esquema_de_color(ジオラマ食堂)
+esquema_de_color(ジオラマ食堂, accuracy = 50)
 plot(ジオラマ食堂)
 ```
 
 ```{r}
-esquema_de_color(新潟の春)
+esquema_de_color(新潟の春, accuracy = 50)
 plot(新潟の春)
 ```
 
@@ -42,8 +43,13 @@ plot(上信電鉄下仁田ー千平)
 ```
 
 ```{r}
-esquema_de_color(美しい窓)
+esquema_de_color(美しい窓, accuracy = 50) 
 plot(美しい窓)
+```
+
+```{r}
+esquema_de_color(大大阪, accuracy = 50)
+plot(大大阪)
 ```
 
 Comparación de resultados con SubPublicidades:
@@ -54,7 +60,7 @@ plot(AD_FibertelM35)
 ```
 
 ```{r}
-esquema_de_color(AD_FibertelM35)
+esquema_de_color(AD_FibertelM35, accuracy = 150)
 ```
 
-Considerando los resultados obtenidos, infiero que en la mayoría de las imagenes que analizaré el #000000 (casi) siempre estará presente en una gran medida y más aún en un espacio subterráneo en donde predominan mayormente los colores oscuros y por la calidad de las fotografías que puedo lograr.
+Considerando los resultados obtenidos, infiero que en la mayoría de las imagenes que analizaré el #000000 (casi) siempre estará presente en una gran medida.
