@@ -17,7 +17,7 @@ round_RGB_df <- function(df, accuracy, f = round, max_val = 255){
     )
 }
 
-esquema-de-color <- function(imagen, accuracy = 190){
+esquema_de_color <- function(imagen, accuracy = 190){
   tmp_df <- to_RGB_df(imagen) %>% 
     round_RGB_df (accuracy = accuracy) %>% 
     mutate(RGB = rgb(R,G,B, maxColorValue = 255))

@@ -1,0 +1,60 @@
+---
+title: "Presentación"
+author: "Matias"
+format: html
+editor: visual
+---
+
+## Non-advertising test
+
+Tengo interés es hacer un test por fuera de las fotografías publicitarias con el fin de distanciarme del problema de la información contextual que estas poseen, en donde #000000 y derivados aparecen como los colores dominantes.
+
+```{r setup, include=FALSE}
+my_files <- dir("R",full.names = TRUE)
+for(archivo in my_files){
+  source(archivo)
+  cat("Procesando:", archivo, "\n")
+}
+library(googledrive)
+root_path <- "SubPublicidades"
+```
+
+```{r}
+ジオラマ食堂 <- image_read("Non-advertising test/ジオラマ食堂.jpg")
+新潟の春 <- image_read("Non-advertising test/新潟の春.jpg")
+上信電鉄下仁田ー千平 <- image_read("Non-advertising test/上信電鉄　下仁田ー千平.jpg")
+美しい窓 <- image_read("Non-advertising test/美しい窓.jpg")
+```
+
+```{r}
+esquema_de_color(ジオラマ食堂)
+plot(ジオラマ食堂)
+```
+
+```{r}
+esquema_de_color(新潟の春)
+plot(新潟の春)
+```
+
+```{r}
+esquema_de_color(上信電鉄下仁田ー千平)
+plot(上信電鉄下仁田ー千平)
+```
+
+```{r}
+esquema_de_color(美しい窓)
+plot(美しい窓)
+```
+
+Comparación de resultados con SubPublicidades:
+
+```{r}
+AD_FibertelM35 <- image_read("tmp/Subte B_2004_Fibertel---Vas-Más-Rápido---Serial-M35.jpg")
+plot(AD_FibertelM35)
+```
+
+```{r}
+esquema_de_color(AD_FibertelM35)
+```
+
+Considerando los resultados obtenidos, infiero que en la mayoría de las imagenes que analizaré el #000000 (casi) siempre estará presente en una gran medida y más aún en un espacio subterráneo en donde predominan mayormente los colores oscuros y por la calidad de las fotografías que puedo lograr.
