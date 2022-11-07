@@ -1,0 +1,155 @@
+---
+title: "Presentación de datos"
+author: "Matias"
+format: html
+editor: visual
+---
+
+## Universo Subte Publicitario. Modelos de clasificación cromática: enfoques asistidos por inteligencia artificial
+
+A través de una base de datos compuesta sobre diversas publicidades gráficas del Subte de la Ciudad de Buenos Aires se emplean distintas funcionalidades de los paquetes {tidyverse} y {magick} y se crean nuevas funciones con el fin de desarrollar un enfoque asistido por inteligencia artificial en la construcción de modelos de clasíficación y representación cromática. El presente trabajo se enmarca dentro de las pruebas piloto de la tesis "Universo Subte Publicitario" en su dimensión cuantitativa.
+
+*Autores*
+
+*Matías Salto, Aleksander Dietrichson*
+
+*Publicado*
+
+*Nov. 07/2022*
+
+------------------------------------------------------------------------
+
+### Presentación
+
+Dentro de los estudios de la comunicación publicitaria y de la semiótica, el interés sobre el significar y las prácticas significantes de los mensajes publicitarios es abordado a través de diversas propuestas y de clásicos marcos teóricos como los de Pierce y Saussure que tienen como finalidad la formulación de intrumentos operativos que sirvan al análisis y a la creatividad publicitaria. Aquí nos centramos dentro de una de las cualidades perceptuales de las publicidades a través de un enfoque especial: el análisis cuantitativo de las propuestas cromáticas de los mensajes publicitarios del Subte de Buenos Aires.
+
+Para ello he utilizado el software estadístico R como entorno de trabajo, manipulación de datos, análisis y representaciones gráficas. En primera instancia, los paquetes {tidyverse} y {magick} son los paquetes más utilizados tanto para la manipulación y visualización de datos como para el procesamiento de imágen. Ambos enfoques pueden combinarse con nuevas funciones ideadas por los intereses de la tesina, los cuales abordan el modo semiótico del color a través de los valores hexadecimales en las fotografías publicitarias.
+
+A continuación se muestran los pasos seguidos:
+
+### 1️⃣ Librerías
+
+Se cargan las librerías, paquetes y funciones de la carpeta R. Por un lado {tidyverse} y {magick}, por otro las funciones creadas para este trabajo.
+
+```{r}
+library(tidyverse) #Manipulación de datos y gráficos
+library(googledrive)
+library(googlesheets4)
+my_files <- dir("R",full.names = TRUE)
+for(archivo in my_files){
+  source(archivo)
+  cat("Procesando:", archivo, "\n")
+}
+```
+
+### 2️⃣ Datos
+
+En este caso, armé una base de datos con publicidades gráficas que fui recolectando durante mis viajes en el Subte en los últimos años en la Línea B. Por otro lado, también incluí una selección de las publicidades del mismo estilo que estuvieron presentes en todas las Líneas de Subte durante los últimos 21 años intermitentes a través de mis fuentes nacionales e internacionales por Internet con el objetivo de enriquecer el análisis y apreciar las posibilidades de mi investigación como estudiante de grado. Cada una de ellas posee impreso en su mensaje publicitario una representación del tiempo social y de las formas de vida de la Ciudad de Buenos Aires.
+
+```{r}
+
+#Presentar las cinco mejores publicidades
+
+```
+
+Se observa la distribución de las publicidades por línea de subte, anunciante y producto, superficie, año, tiempo y orientación temporal, cromática y mensaje verbal.
+
+### 3️⃣ Elaboración de funciones y gráficos
+
+Como método de ordenar y transformar los datos de las publicidades se escriben nuevas funciones centradas en la manipulación de los colores mediante los códigos hexadecimales incrustados en las fotografías:
+
+```{r}
+#Acceso a los archivos locales
+my_data <- read_rds("tmp/file_info.rds")
+```
+
+### 1.1. Analizar foto
+
+Para basarse en los códigos hexadecimales como método de acceso y tratamiento fotográfico se realizan scripts para determinar la prevalencia de color en una foto y luego transformar los datos hacia valores númericos. En rigor, se trabaja por sobre los valores R-G-B de las publicidades y se elaboran tablas que agrupan tanto los colores como sus valores.
+
+```{r}
+AD_FibertelM35 <- "tmp/Subte B_2004_Fibertel---Vas-Más-Rápido---Serial-M35.jpg"
+analizar_foto(AD_FibertelM35)
+```
+
+La clave del trabajo por sobre esta dimensión requirió comprender el funcionamiento de los HEXs. Esta representación en código binario comienza un hashtag (#) y es continuado por 6 letras y/o números. Las primeras dos letras/números se refieren al rojo, las siguientes dos al verde y las últimas dos se refieren al azul. Los números son utilizados en valores que oscilan del 1 al 9, cuando un valor es mayor a 9 se emplea una letra. Por ejemplo: A=10. El valor de los colores están definidos entre valores de 00 y FF, en contraste del 0 al 255 como sucede con los RGB.
+
+### 1.2. Convert_to_df
+
+### 1.3. Visualizar colores
+
+### 1.4. Colores primarios
+
+```{r}
+AD_Fibertel <- image_read("tmp/Subte B_2004_Pensá-Rápido-Pensá-FiberTel---Serial-M36.jpg")
+plot(AD_Fibertel)
+to_RGB_df(AD_Fibertel) -> my_data
+```
+
+Por los análisis realizados, tenemos el RGB de las fotografías y cada uno puede tener un valor de 0 a 255. Lo cual equivale a 16M de colores y un análisis sin sentido ya que el 90% de los colores no se podrá dimensionar de forma concreta. Para solucionar esta cuestión, se opta por redondear los valores de los colores.
+
+Lo que se realiza es el cálculo de la distancia del punto del color, el cual posee tres coordenadas: R, G y B. Lo que queremos saber es la distancia en cada uno de estos puntos y para ello utilizamos una lista de códigos HTML de colores primarios como cálculo de comparación mientras buscamos el valor menor.
+
+```{r}
+#Ver colores primarios en tabla
+```
+
+```{r}
+my_data2 <- to_RGB_df(AD_Fibertel)
+cp <- colores_primarios
+my_data2$color_name <- 
+  purrr::pmap(my_data2,~{
+    dist_vec <- sqrt((..1-cp$R)^2+(..2-cp$G)^2+(..3-cp$B)^2)
+    res <- which.min(dist_vec)
+    cp$color_name[[res]] 
+    # res
+  }) %>% unlist()
+my_data2 <- my_data2 %>% 
+  left_join(colores_primarios %>% select(color_name, hex))
+
+my_color_scale <- colores_primarios$hex
+names(my_color_scale) <- colores_primarios$color_name
+my_data2 %>% 
+  group_by(color_name,hex) %>% 
+  count() %>% 
+  ggplot(aes(x=color_name,y=n,fill=color_name))+
+  geom_col()+
+  scale_fill_manual(values = my_color_scale)+
+   theme(legend.position="none")
+```
+
+Sin embargo, podemos determinar que la matemática no coincide con la distribución. El algoritmo determina la presencia dominante de un color en razón de la menor distancia que encuentra con los datos otorgados.
+
+En razón de que los resultados no son satisfactorios, probamos con otras funciones:
+
+### 1.5 Esquema de color
+
+El objetivo es establecer una función de redondeo de valores dentro del dataframe con una exactitud determinada. Por ejemplo, redondeamos los valores al 5 más cercano:
+
+```{r}
+my_data3 %>% 
+  round_RGB_df(accuracy = 5) %>% 
+  head()
+```
+
+```{r}
+redondeo_y_plot(AD_Fibertel, accuracy = 90)
+```
+
+### 1.6. Acuerdo cromático
+
+En primer lugar, reducimos los datos a un data frame para tener los valores primarios y así tener un mejor modelo de análisis. Por otro lado, seguimos utilizando las funciones de redondear colores para un análisis concreto.
+
+El objetivo de acuerdo cromático es establecer un algoritmo que genere modelos estadísticos para predecir o calcular la cromática de las fotografías publicitarias basado en los colores que poseen las imágenes. Con estas funciones lo que vemos es si una publicidad pertenece a la categoría de cálida o fría según el algoritmo basado en porcentajes.
+
+Es decir, lo que tenemos como predicción es en qué porcentaje estima la IA que determinada fotografía publicitaria esté en la categoría de cálido o frío. Al ser una distribución de probabilidad binomial discreta, se admiten dos categorías posibles de resultados.
+
+Continuamos con la evaluación:
+
+-   Si la predicción es de valor más de 50 equivale a frío y si no equivale a cálido.
+
+Como resultado, lo que tenemos es una nueva opinión dentro de la base de datos: mi visión personal basado en elementos teóricos y la lectura de la IA basado en el algoritmo que hemos realizado. Lo interesante es observar la coincidencia entre ambas lecturas posibles:
+
+-   Coincidimos un total de 26 veces
+
+Si establecemos mayores interacciones entre los RGB obtenemos un acuerdo del 80%.
