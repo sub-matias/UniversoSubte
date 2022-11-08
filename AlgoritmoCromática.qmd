@@ -1,0 +1,178 @@
+---
+title: "Algoritmo / Cromática"
+author: "Matias"
+format: html
+editor: visual
+---
+
+## Algoritmo / Cromática
+
+Notas de ejercicio de modelaje dentro de los análisis:
+
+-   Nos centramos dentro de lo que es la elaboración de algoritmo en cuanto a la categorización de escala cromática cálido o frío de las publicidades gráficas. El objetivo es contrasta lo que ya se tiene con lo nuevo, el cual otorga algo interesante: un cálculo estadístico de común acuerdo entre la IA y mi visión acerca de los colores de las publicidades.
+
+### PyF
+
+```{r}
+library(tidyverse)
+library(googledrive)
+library(googlesheets4)
+my_files <- dir("R",full.names = TRUE)
+for(archivo in my_files){
+  source(archivo)
+  cat("Procesando:", archivo, "\n")
+}
+```
+
+### Acceso a las URL
+
+Queremos sacar los colores, que funciones usamos?
+
+Para ello, reducimos todos los datos a una columna para tener los valores primarios y poder armar mejor el modelo:
+
+```{r}
+#dir.create("tmp2")
+#setwd ("tmp2") #Acá estoy seteando un working directory, por eso tuve problemas después para trabajar con archivos por encima de tmp2
+tmp_file <- drive_download(datos$URL[5], overwrite = TRUE)
+my_image <- image_read(path = tmp_file$local_path)
+my_df <- to_RGB_df(my_image)
+my_df %>%
+  summarize(
+    Red = mean(R),
+    Green = mean(G),
+    Blue = mean(B),
+    Red_sd = sd(R),
+    Green_sd = sd(G),
+    Blue_sd = sd(B),)
+```
+
+```{r}
+#No corro esto ya que exige más memoria de la que poseo en la cuenta, así que recurruo al backup realizado en clase
+#setwd("tmp2")
+#datos <- datos %>% 
+#  filter(!is.na(URL))
+#my_new_data <- data.frame()
+#index <- 1
+#for(URL in datos$URL){
+#  index <- index +1
+  
+#  cat(index, " Analizando: ", URL, "\n")
+#  tmp_file <- drive_download(URL, overwrite = TRUE)
+#  my_image <- image_read(path =tmp_file$local_path)
+#  my_df <- to_RGB_df(my_image)
+#  my_df %>% 
+#    summarize(
+#      Red = mean(R),
+#      Green = mean(G),
+#     Blue = mean(B),
+#      Red_sd = sd(R),
+#      Green_sd = sd(G),
+#      Blue_sd = sd(B),
+#    ) -> tmp
+#  my_new_data <- rbind(my_new_data, tmp)
+#}
+```
+
+Los resultados de los datos preliminares (hasta el 0311) están guardados.
+
+### Modelar
+
+Empleamos un modelo estadístico para predecir o calcular la cromática basado en los colores de las publicidades
+
+```{r}
+fotos_con_analysis_de_colores %>%
+  mutate(Cromatica = as.factor (Cromatica)) %>%
+  glm(Cromatica ~ (Red + Green + Blue)^2,family = "binomial", data=.)-> my_model1
+summary(my_model1)
+```
+
+```{r}
+fotos_con_analysis_de_colores %>%
+  mutate(Cromatica = as.factor(Cromatica)) %>% 
+  glm(Cromatica ~ Red + Green + Blue,family = "binomial", data=.)-> my_model2
+summary(my_model2)
+```
+
+Lo que tenemos es un modelo estadístico que nos dice con cierta exactitud la predicción basándose en estas fórmulas (coefficients arriba). Con esto lo que vemos es si una publicidad es cálida o fría.
+
+```{r}
+predict(my_model2,type = "response") -> porcentajes
+plot(porcentajes)
+```
+
+```{r}
+fotos_con_analysis_de_colores$prediccion <- porcentajes
+```
+
+Lo que tenemos como predicción es en qué porcentaje estima la IA que determinada publicidad esté en la categoría de frío o calido. Frio equivale a 1, cálido sería 0.
+
+Continuamos la evaluación:
+
+Si la predicción es más de 50, la predicción es frío y si no es cálido.
+
+```{r}
+fotos_con_analysis_de_colores <- fotos_con_analysis_de_colores %>% 
+  mutate(pred_dura = ifelse(prediccion>.5, "Frío", "Cálido"))
+```
+
+Ahora tenemos una doble opinión sobre escala cromática, la mía y la de IA. Lo que queremos saber es si ambas coinciden o no.
+
+```{r}
+sum(fotos_con_analysis_de_colores$Cromatica == fotos_con_analysis_de_colores$pred_dura)#/nrow(fotos_con_analysis_de_colores)
+```
+
+O en porcentaje:
+
+```{r}
+fotos_con_analysis_de_colores2 <- fotos_con_analysis_de_colores
+predict(my_model1,type = "response") -> porcentajes
+fotos_con_analysis_de_colores2$prediccion <- porcentajes
+my_data3 <- fotos_con_analysis_de_colores2 %>% 
+  mutate(pred_dura = ifelse(prediccion>.5, "Frío", "Cálido"))
+sum(my_data3$Cromatica == my_data3$pred_dura)/nrow(my_data3)
+```
+
+A continuación se establecen mayores interacciones entre los tres colores (R-G-B)
+
+```{r}
+my_data4 <- fotos_con_analysis_de_colores2
+my_data4 %>% 
+  mutate(Cromatica = as.factor(Cromatica)) %>% 
+  glm(Cromatica ~ (Red + Green + Blue)^3,family = "binomial", data=.)-> my_model4
+summary(my_model4)
+```
+
+```{r}
+predict(my_model4,type = "response") -> porcentajes
+my_data4$prediccion <- porcentajes
+my_data4 <- my_data4 %>% 
+  mutate(pred_dura = ifelse(prediccion>.5, "Frío", "Cálido"))
+sum(my_data4$Cromatica == my_data4$pred_dura)/nrow(my_data4)
+```
+
+En este caso tenemos un mayor porcentaje de común acuerdo. El modelo, usando el promedio de los tres colores de la foto, está de acuerdo según este tipo de porcentaje.
+
+Se comentó que un 80% es un nivel más que aceptable dentro de estos estudios.
+
+Por otro lado, también se puede determinar el coeficiente.
+
+```{r}
+coef(my_model4)
+
+```
+
+Esta es la siguiente base: $$
+\hat{Y} \sim R + G + B + \epsilon
+$$
+
+En la cual se encuentran dos opciones posibles:
+
+$$
+\hat{Y} = [Calido|Frio]
+$$
+
+Basados en los tres colores
+
+$$
+Calido|Frio \sim R + G + B
+$$
