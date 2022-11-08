@@ -30,7 +30,7 @@ my_data <- googlesheets4::read_sheet(my_url2)
 
 ## Acceder los links
 
-De prueba: 
+De prueba:
 
 ```{r}
 dir.create("tmp2")
@@ -49,7 +49,6 @@ summarize(
   )
 
 ```
-
 
 ```{r}
 setwd("tmp2")
@@ -77,6 +76,7 @@ for(URL in my_data$URL){
 }
 
 ```
+
 ```{r}
 my_data2 <- cbind(my_data,my_new_data)
 ```
@@ -84,12 +84,12 @@ my_data2 <- cbind(my_data,my_new_data)
 ```{r}
 my_data2
 ```
+
 # Hacer backup
 
 ```{r}
 write_rds(my_data2,"./data/fotos_con_analysis_de_colores.rds")
 ```
-
 
 # Modelar.
 
@@ -98,7 +98,6 @@ my_data2 %>%
   mutate(Cromatica = as.factor(Cromatica)) %>% 
   glm(Cromatica ~ (Red + Green + Blue)^2,family = "binomial", data=.)-> my_model1
 ```
-
 
 ```{r}
 my_data2 %>% 
@@ -111,11 +110,9 @@ summary(my_model2)
 predict(my_model2,type = "response") -> porcentajes
 ```
 
-
 ```{r}
 my_data2$prediccion <- porcentajes
 ```
-
 
 # Evaluar
 
@@ -127,6 +124,7 @@ my_data2 <- my_data2 %>%
 ```{r}
 sum(my_data2$Cromatica == my_data2$pred_dura)/nrow(my_data2)
 ```
+
 ```{r}
 my_data3 <- my_data2
 predict(my_model1,type = "response") -> porcentajes
@@ -141,6 +139,7 @@ sum(my_data3$Cromatica == my_data3$pred_dura)/nrow(my_data3)
 ```
 
 ## Mas interacciones
+
 ```{r}
 my_data4 <- my_data2
 my_data4 %>% 
@@ -148,7 +147,6 @@ my_data4 %>%
   glm(Cromatica ~ (Red + Green + Blue)^3,family = "binomial", data=.)-> my_model4
 summary(my_model4)
 ```
-
 
 ```{r}
 predict(my_model4,type = "response") -> porcentajes
@@ -165,16 +163,12 @@ sum(my_data4$Cromatica == my_data4$pred_dura)/nrow(my_data4)
 coef(my_model4)
 ```
 
-$$
+\$\$
 
-\hat{Y} \sim R + G + B + \epsilon
-$$
-$$
-\hat{Y} = [Calido|Frio]
-$$
+\hat{Y} \sim R + G + B + \epsilon \$\$
 
+\$\$ \hat{Y} = \[Calido\|Frio\] \$\$
 
-$$
+\$\$
 
-Calido|Frio \sim R + G + B
-$$
+Calido\|Frio \sim R + G + B \$\$
