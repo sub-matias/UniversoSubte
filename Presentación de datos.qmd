@@ -217,7 +217,7 @@ my_data2_AD_FibertelM35 <- my_data2_AD_FibertelM35 %>%
 
 my_color_scale <- colores_primarios$hex
 names(my_color_scale) <- colores_primarios$color_name
-my_data2 %>% 
+my_data2_AD_FibertelM35 %>% 
   group_by(color_name,hex) %>% 
   count() %>% 
   ggplot(aes(x=color_name,y=n,fill=color_name))+
