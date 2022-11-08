@@ -14,6 +14,8 @@ editor: visual
 ```{r}
 #| include: false
 library(tidyverse)
+library(ggthemes)
+theme_set(theme_dark())
 my_data <- read_rds("./modelos/my_data2.Rds")
 model <- read_rds("./modelos/my_model2.Rds")
 ```
@@ -81,6 +83,28 @@ $$
 ```{r}
 #| echo: true
   predict(model,newdata = my_data[1,], type="response")
+```
+## Visualizar el modelo
+
+```{r}
+#| echo: false
+#| warning: false
+tmp_df2 <-
+  data.frame(
+    pred = predict(model),
+    hp = ifelse(my_data$pred_dura=="Frío",1,0)
+  )
+tmp_df2 %>% 
+  ggplot(aes(y=hp,x=pred))+
+  geom_point()+
+  xlim(-4, 4)+
+  geom_function(fun=function(x){
+    (1 / (1 + exp(-x)))
+    }, color = "red", lty=2, lwd=1)+
+  theme(axis.text.x=element_blank(),
+      axis.ticks.x=element_blank(),
+      axis.text.y=element_blank(),
+      axis.ticks.y=element_blank())
 ```
 
 
