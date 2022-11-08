@@ -33,8 +33,8 @@ Se cargan las librerías, paquetes y funciones de la carpeta R. Por un lado {tid
 
 ```{r}
 library(tidyverse) #Manipulación de datos y gráficos
-library(googledrive)
-library(googlesheets4)
+library(googledrive) #Acceso al ecosistema de Google
+library(googlesheets4) #Acceso a la base de datos
 my_files <- dir("R",full.names = TRUE)
 for(archivo in my_files){
   source(archivo)
@@ -59,13 +59,22 @@ Se observa la distribución de las publicidades por línea de subte, anunciante 
 Como método de ordenar y transformar los datos de las publicidades se escriben nuevas funciones centradas en la manipulación de los colores mediante los códigos hexadecimales incrustados en las fotografías:
 
 ```{r}
+#Presentación escrita de los datos
+```
+
+```{r}
 #Acceso a los archivos locales
 my_data <- read_rds("tmp/file_info.rds")
 ```
 
 ### 1.1. Analizar foto
 
-Para basarse en los códigos hexadecimales como método de acceso y tratamiento fotográfico se realizan scripts para determinar la prevalencia de color en una foto y luego transformar los datos hacia valores númericos. En rigor, se trabaja por sobre los valores R-G-B de las publicidades y se elaboran tablas que agrupan tanto los colores como sus valores.
+Para basarse en los códigos hexadecimales como método de acceso y tratamiento fotográfico se realizan scripts para determinar la prevalencia de color en una foto y luego transformar los datos hacia valores númericos. En rigor, se trabaja por sobre los valores R/G/B de las publicidades y se elaboran tablas que agrupan tanto los colores como sus valores.
+
+```{r}
+AD_FibertelM35 <- image_read("tmp/Subte B_2004_Fibertel---Vas-Más-Rápido---Serial-M35.jpg")
+plot(AD_FibertelM35)
+```
 
 ```{r}
 AD_FibertelM35 <- "tmp/Subte B_2004_Fibertel---Vas-Más-Rápido---Serial-M35.jpg"
@@ -74,37 +83,129 @@ analizar_foto(AD_FibertelM35)
 
 La clave del trabajo por sobre esta dimensión requirió comprender el funcionamiento de los HEXs. Esta representación en código binario comienza un hashtag (#) y es continuado por 6 letras y/o números. Las primeras dos letras/números se refieren al rojo, las siguientes dos al verde y las últimas dos se refieren al azul. Los números son utilizados en valores que oscilan del 1 al 9, cuando un valor es mayor a 9 se emplea una letra. Por ejemplo: A=10. El valor de los colores están definidos entre valores de 00 y FF, en contraste del 0 al 255 como sucede con los RGB.
 
-### 1.2. Convert_to_df
+Veamos lo que sucede al analizar una publicidad en un Subte*pass*:
 
-### 1.3. Visualizar colores
+```{r, echo=FALSE}
+tmp1 <- image_read("tmp/Subte B_2004_Fibertel---Vas-Más-Rápido---Serial-M35.jpg")
 
-### 1.4. Colores primarios
+tmp1
 
-```{r}
-AD_Fibertel <- image_read("tmp/Subte B_2004_Pensá-Rápido-Pensá-FiberTel---Serial-M36.jpg")
-plot(AD_Fibertel)
-to_RGB_df(AD_Fibertel) -> my_data
+as.raster(tmp1) %>% head(10)
 ```
 
-Por los análisis realizados, tenemos el RGB de las fotografías y cada uno puede tener un valor de 0 a 255. Lo cual equivale a 16M de colores y un análisis sin sentido ya que el 90% de los colores no se podrá dimensionar de forma concreta. Para solucionar esta cuestión, se opta por redondear los valores de los colores.
+Con el objetivo de emprender un análisis coherente, comenzamos la búsqueda de los colores predominantes basándonos en la teoría de los códigos hexadecimales:
 
-Lo que se realiza es el cálculo de la distancia del punto del color, el cual posee tres coordenadas: R, G y B. Lo que queremos saber es la distancia en cada uno de estos puntos y para ello utilizamos una lista de códigos HTML de colores primarios como cálculo de comparación mientras buscamos el valor menor.
+```{r}
+tmp1 %>%
+  as.raster() %>%
+  as.matrix() %>%
+  as.vector() %>%
+  head()
+```
+
+```{r}
+my_data <- data.frame(
+  R = str_sub(mis_colores,2,3),
+  G = str_sub(mis_colores,4,5),
+  B = str_sub(mis_colores,6,7),
+  A = str_sub(mis_colores,8,9)
+)
+
+my_data %>% head(15)
+```
+
+Podemos observar el propio caos de la distribución de valores RGyB en cada píxel de la fotografía publicitaria. Para otorgar un orden, deconstruímos los códigos hexadecimales de los colores en cuatro columnas basados en su teoría:
+
+1.  Los primeros dos números y/o letras conforman los valores rojos
+2.  Los segundos refieren a los valores verdes
+3.  Los terceros a los azules
+
+Los valores alpha, los cuales corresponden a la transparencia, son eliminados de las bases de datos en razón de que poseen valor nulo y en efecto no configuran datos relevantes para la investigación.
+
+A continuación, elaboramos un algoritmo para el cálculo y la representación gráfica de los colores dominantes basados en un inicial cálculo de redondeo de los valores hexadecimales combinados:
+
+```{r}
+my_data %>% 
+  mutate(
+    Red = stringr::str_sub(R,1,1) %>% stringr::str_c("0"),
+    Green = stringr::str_sub(G,1,1) %>% stringr::str_c("0"),
+    Blue = stringr::str_sub(B,1,1) %>% stringr::str_c("0"),
+    Alpha = stringr::str_sub(A,1,1) %>% stringr::str_c("0")
+      ) -> my_data
+
+my_data <- my_data %>% 
+  mutate(color_nuevo = paste0("#",Red,Green,Blue))
+
+my_data %>% 
+  group_by(color_nuevo) %>% 
+  tally(sort=TRUE) %>% 
+  head(30) -> tmp
+
+tmp %>% 
+  ggplot(aes(color_nuevo,n))+
+  geom_col(fill = tmp$color_nuevo)
+```
+
+### 1.2. Visualizar RGB
+
+A través de la función "visualizar colores" lo que trabajamos es un ensayo del valor de los colores absolutos a través de gráficos de barra. Aquí, al igual que en los demás análisis realizados, los valores hexadecimales continúan siendo organizados por medio de su teoría y las necesidades de la investigación gracias a las funciones que realizamos (analizar foto, hexadecimal a númerico y foto a dataframe) y son analizados como datos con categorías asignadas manualmente a través de un data frame: los R, los G y los B.
+
+```{r}
+ADs <- read_rds("tmp/file_info.rds")
+AD_Metrogas <- paste0("tmp/",ADs$filename[45])
+
+colores_barchart(AD_Metrogas)
+AD_Metrogas <- magick::image_read(AD_Metrogas)
+plot(AD_Metrogas)
+```
+
+```{r}
+#| results: asis
+#| echo: false 
+for(i in 1:10){
+  cat("  \n## Imagen ", i,"\n")
+  mi_filename <-mi_filename <- paste0("tmp/",ADs$filename[i])
+  colores_barchart(mi_filename) %>% plot()
+  cat("\n\n")
+  mi_imagen <- magick::image_read(mi_filename)
+  plot(mi_imagen)
+  cat("\n\n")
+}
+```
+
+Como resultado de esto, tenemos un modo de aproximación reducido de lectura que sucede previo a la combinación de los grados y los valores de colores que se produce dentro de cada píxel de la imagen publicitaria. En rigor, al categorizar y sistematizar la información realizamos una lectura gráfica que expone la fuerza de las presencia en la totalidad de la distribución de los datos en porcentajes.
+
+Ahora bien, ¿cómo podemos continuar afrontando el deseo de sistematizar el análisis y las representaciones de los valores y los grados combinados tanto en los datos que se produce en cada píxel como en nuestra visión al observar una publicidad?
+
+### 1.3. Colores primarios
+
+```{r}
+AD_FibertelM35 <-image_read("tmp/Subte B_2004_Fibertel---Vas-Más-Rápido---Serial-M35.jpg")
+plot(AD_FibertelM35)
+to_RGB_df(AD_FibertelM35) -> my_data_colores_primarios
+```
+
+En cada fotografía publicitaria y en cada función que hemos realizado hasta el momento, tenemos tanto los códigos hexadecimales como los valores RGB a nuestro favor. Sin embargo, al adentrarnos a la representación combinada debemos considerar que cada RGB puede tener un valor de 0 a 255. En efecto, esto equivale a 16M de colores y a un análisis sin sentido ya que el 90% de los colores no se podrán dimensionar de forma concreta y las representaciones serán un sinfín de valores mínimos. Para solucionar el caos de los datos, se opta por realizar un redondeo de los valores.
+
+En primer lugar, lo que consideramos es realizar un cálculo de las distancias del punto del color en base a las tres coordenadas posibles: R, G y B. Como punto de referencia para el algoritmo, esas distancias son en relación a una lista de códigos HTML de colores primarios.
 
 ```{r}
 #Ver colores primarios en tabla
 ```
 
+En efecto, lo que observamos es la representación gráfica de los colores de la publicidad en referencia directa con un valor HEX que es provista al algoritmo. Por ejemplo, todos los códigos hexadecimales que se encuentran incrustados en los datos y mayor presencia de azules tengan (sin importar cuán diferente sean los unos de los otros azules) se van a computar como más próximo hacia el azul que está en la lista de colores primarios. Consecuentemente, se representan todos los azules como un solo azul: el de la lista de los colores primarios. Lo mismo sucede con cada valor posible.
+
 ```{r}
-my_data2 <- to_RGB_df(AD_Fibertel)
+my_data2_AD_FibertelM35 <- to_RGB_df(AD_FibertelM35)
 cp <- colores_primarios
-my_data2$color_name <- 
-  purrr::pmap(my_data2,~{
+my_data2_AD_FibertelM35$color_name <- 
+  purrr::pmap(my_data2_AD_FibertelM35,~{
     dist_vec <- sqrt((..1-cp$R)^2+(..2-cp$G)^2+(..3-cp$B)^2)
     res <- which.min(dist_vec)
     cp$color_name[[res]] 
     # res
   }) %>% unlist()
-my_data2 <- my_data2 %>% 
+my_data2_AD_FibertelM35 <- my_data2_AD_FibertelM35 %>% 
   left_join(colores_primarios %>% select(color_name, hex))
 
 my_color_scale <- colores_primarios$hex
@@ -118,13 +219,39 @@ my_data2 %>%
    theme(legend.position="none")
 ```
 
-Sin embargo, podemos determinar que la matemática no coincide con la distribución. El algoritmo determina la presencia dominante de un color en razón de la menor distancia que encuentra con los datos otorgados.
+Ahora bien, podemos determinar que la matemática no coincide ni con la distribución de los datos ni con nuestra visión de las publicidades al ver los resultados. Si bien el algoritmo funciona de forma óptima al determinar las presencias de los colores dominantes dentro de cada publicidad calculando las menores distancias en base a una lista de referencia, este lo hace de forma acotada. Justamente porque son los únicos datos que posee para trabajar y, en efecto, no termina siendo lo suficientemente exhaustivo. Por ejemplo, un amarillo puede ser representado como oliva o naranja y no estoy de acuerdo con ese resultado.
 
-En razón de que los resultados no son satisfactorios, probamos con otras funciones:
+Nosotros vamos con una idea, la probamos y nos damos cuenta que no va a servir. Entonces, probamos redondear valores de otra forma:
 
-### 1.5 Esquema de color
+### 1.4. Esquema de color
 
-El objetivo es establecer una función de redondeo de valores dentro del dataframe con una exactitud determinada. Por ejemplo, redondeamos los valores al 5 más cercano:
+La función de esquema de color representa a una función de redondeo que es flexible ya que nos permite alcanzar múltiples representaciones en base a una precisión que nosotros le indiquemos al algoritmo. Descartando una referencia de colores primarios, lo que optamos es redondear cada valor RGB incrustado en los datos con un valor númerico determinado. Veamos el caso del Subtepass de Fibertel:
+
+En primer lugar, calculamos los valores RGB que posee el Subtepass en un data frame indicando un valor máximo de 255
+
+```{r}
+round_to_any <- function (x, accuracy, f = round) 
+{
+  f(x/accuracy) * accuracy
+}
+round_RGB_df <- function(df, accuracy, f = round, max_val = 255){
+  df %>% 
+    mutate(
+      R = round_to_any(R, accuracy, f),
+      G = round_to_any(G, accuracy, f),
+      B = round_to_any(B, accuracy, f)
+    ) %>% 
+    mutate(
+      R = ifelse(R > max_val, max_val, R ),
+      G = ifelse(G > max_val, max_val, G ),
+      B = ifelse(B > max_val, max_val, B ),
+      )
+}
+my_data3 <- to_RGB_df(AD_FibertelM35)
+head(my_data3)
+```
+
+Luego, lo que hacemos es establecer un cálculo en la que cada valor RGB se redondee a un valor específico. Por ejemplo, realizamos un redondeo con valor de 5 más cercano:
 
 ```{r}
 my_data3 %>% 
@@ -132,11 +259,29 @@ my_data3 %>%
   head()
 ```
 
+Como se puede ver, cada código RGB es múltiplo de 5. A continuación realizamos un gráfico de estos valores representados en una tabla con un cálculo de valor 75 para observar si los resultados son más exhaustivos o no que en la función de colores primarios:
+
 ```{r}
-redondeo_y_plot(AD_Fibertel, accuracy = 90)
+esquema_de_color(AD_FibertelM35, accuracy = 75)
 ```
 
-### 1.6. Acuerdo cromático
+Veamos con otras publicidades:
+
+```{r}
+AD_Metrogas <- image_read("tmp/Subte B_2022_2022 I antes de que llegue el subte.jpeg")
+to_RGB_df(AD_Metrogas) -> my_data_colores_primarios_Metrogas
+plot(AD_Metrogas)
+```
+
+```{r}
+esquema_de_color(AD_Metrogas, accuracy = 75)
+```
+
+En rigor, la función de esquema de color nos permite elaborar una paleta de colores gracias al enfoque combinatorio y generativo del cálculo de redondeo que se torna más interesante si decidimos manipular los datos con un valor númerico concreto. Por ejemplo, las columnas pueden variar mientras menor sea el número de cálculo de referencia y en viceversa.
+
+Este análisis de datos contrasta con el temprano acercamiento del inventario de colores primarios que representan unidades básicas y aísladas. Por otro parte, debe considerarse que los resultados son finitos en contraste con la infinita cantidad de colores que pueden ser generados. Para que este análisis tenga coherencia y sentido, optamos por seguir el camino de redondeo a través de distintas aproximaciones posibles.
+
+### 1.5. Acuerdo cromático / cambiar nombre
 
 En primer lugar, reducimos los datos a un data frame para tener los valores primarios y así tener un mejor modelo de análisis. Por otro lado, seguimos utilizando las funciones de redondear colores para un análisis concreto.
 
