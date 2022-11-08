@@ -14,7 +14,6 @@ my_image <- image_read("tmp/Subte A_2018_Flybondi.jpeg")
 plot(my_image)
 ```
 
-
 Queremos reducir el numero de colores a algo mas manejable.
 
 ```{r}
@@ -23,12 +22,9 @@ my_image2 <- image_quantize(my_image,
 plot(my_image2)
 ```
 
-
-
 ```{r}
 to_RGB_df(my_image2) -> my_data
 ```
-
 
 Entonces:
 
@@ -45,9 +41,7 @@ my_data %>%
   head()
 ```
 
-
 Hacemos escalas
-
 
 ```{r}
 
@@ -67,6 +61,7 @@ my_data %>%
    theme(legend.position="none")
   
 ```
+
 ## Con escala estandardizada
 
 ```{r}
@@ -88,9 +83,6 @@ my_data2 <- my_data2 %>%
 
 
 ```
-
-
-
 
 Visualizamos
 
@@ -136,6 +128,7 @@ head(my_data3)
 ```
 
 Miremos:
+
 ```{r}
 my_data3 %>% 
   round_RGB_df(accuracy = 5) %>% 
@@ -173,21 +166,25 @@ OK, muy finito, intentemos otro redondeo mas grueso
 ```{r}
 redondeo_y_plot(my_image, accuracy = 50)
 ```
+
 pareceria mas interesante...
 
 ```{r}
 redondeo_y_plot(my_image, accuracy = 100)
 ```
+
 ```{r}
 redondeo_y_plot(my_image, accuracy = 64)
 ```
+
 ```{r}
 redondeo_y_plot(my_image, accuracy = 80)
 ```
+
 ```{r}
 redondeo_y_plot(my_image, accuracy = 128)
 ```
+
 ```{r}
 redondeo_y_plot(my_image, accuracy = 127)
 ```
-
