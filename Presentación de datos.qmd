@@ -104,6 +104,13 @@ tmp1 %>%
 ```
 
 ```{r}
+mis_colores <- tmp1 %>% 
+  as.raster() %>% 
+  as.matrix() %>% 
+  as.vector() 
+```
+
+```{r}
 my_data <- data.frame(
   R = str_sub(mis_colores,2,3),
   G = str_sub(mis_colores,4,5),
