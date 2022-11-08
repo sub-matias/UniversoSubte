@@ -64,7 +64,7 @@ $$
 \underline{+(0.01935391\times\color{blue}{103.8965})    }\\
 =\underline{\underline{2.327996}}
 \end{align}
-$$ 
+$$
 
 ## Ejemplo - Interpretar resultado
 
@@ -77,13 +77,13 @@ p = {e^{\beta_0 + \beta_R+\beta_G+\beta_B }\over{1+e^{{\beta_0 + \beta_R+\beta_G
 =0.9111693 \sim 91.11\%
 $$
 
-
 ## Ejemplo - O hacerlo directamente en R
 
 ```{r}
 #| echo: true
   predict(model,newdata = my_data[1,], type="response")
 ```
+
 ## Visualizar el modelo
 
 ```{r}
@@ -106,5 +106,3 @@ tmp_df2 %>%
       axis.text.y=element_blank(),
       axis.ticks.y=element_blank())
 ```
-
-
