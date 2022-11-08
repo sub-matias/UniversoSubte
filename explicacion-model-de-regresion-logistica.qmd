@@ -1,0 +1,110 @@
+---
+title: "Ejemplo Regresion Logistica"
+format:
+  revealjs: 
+    theme: dark
+editor: visual
+---
+
+## Modelo 1
+
+-   Modelo sencillo con tres terminos
+-   No analiza interacciones entre los colores
+
+```{r}
+#| include: false
+library(tidyverse)
+library(ggthemes)
+theme_set(theme_dark())
+my_data <- read_rds("./modelos/my_data2.Rds")
+model <- read_rds("./modelos/my_model2.Rds")
+```
+
+$$
+logit(p_i) = \beta_0 + \beta_R+\beta_G+\beta_B
+$$
+
+## Coeficientes
+
+-   Expresados en **logaritmos de la razón de momios**
+
+```{r}
+#| echo: true
+coef(model)
+```
+
+$$
+logit(p_i) = \beta_0 + \beta_R+\beta_G+\beta_B \\
+logit(p_i)= 2.63604699+\\
+(-0.12782665\times{Red})+\\
+(0.09122828\times{Green})+\\
+(0.01935391\times{Blue})
+$$
+
+## Ejemplo
+
+```{r}
+#| echo: true
+my_data[1,] %>% 
+  select(Red, Green, Blue)
+```
+
+```{r}
+#| include: false
+my_coef <- coef(model)
+my_sum = sum(my_coef[2:4]*my_data[1,c("Red","Green","Blue")])+my_coef[[1]]
+my_percentage <- exp(my_sum)/(1+exp(my_sum))
+```
+
+$$
+\begin{align}
+2.63604699\\
++(-0.12782665\times\color{red}{85.8014})\\
++(0.09122828\times\color{green}{94.8045 })\\
+\underline{+(0.01935391\times\color{blue}{103.8965})    }\\
+=\underline{\underline{2.327996}}
+\end{align}
+$$ 
+
+## Ejemplo - Interpretar resultado
+
+-   Expresados en **logaritmos de la razón de momios**
+-   Se puede convertir en porcentaje con
+
+$$
+p = {e^{\beta_0 + \beta_R+\beta_G+\beta_B }\over{1+e^{{\beta_0 + \beta_R+\beta_G+\beta_B }}}}\\
+={e^{2.327996}\over{1+e^{2.327996}}}\\
+=0.9111693 \sim 91.11\%
+$$
+
+
+## Ejemplo - O hacerlo directamente en R
+
+```{r}
+#| echo: true
+  predict(model,newdata = my_data[1,], type="response")
+```
+## Visualizar el modelo
+
+```{r}
+#| echo: false
+#| warning: false
+tmp_df2 <-
+  data.frame(
+    pred = predict(model),
+    hp = ifelse(my_data$pred_dura=="Frío",1,0)
+  )
+tmp_df2 %>% 
+  ggplot(aes(y=hp,x=pred))+
+  geom_point()+
+  xlim(-4, 4)+
+  geom_function(fun=function(x){
+    (1 / (1 + exp(-x)))
+    }, color = "red", lty=2, lwd=1)+
+  theme(axis.text.x=element_blank(),
+      axis.ticks.x=element_blank(),
+      axis.text.y=element_blank(),
+      axis.ticks.y=element_blank())
+```
+
+
