@@ -1,0 +1,164 @@
+---
+title: "Universo Subte Publicitario"
+subtitle: "Modelos de clasificación cromática: enfoques asistidos por inteligencia artificial"
+author: "Matías Salto, Aleksander Dietrichson"
+date: Nov. 09/2022
+format: revealjs
+editor: visual
+---
+
+## 🚇Introducción
+
+```{r}
+#| include: false
+library(tidyverse) #Manipulación de datos y gráficos
+library(googledrive) #Acceso al ecosistema de Google
+library(googlesheets4) #Acceso a la base de datos
+my_files <- dir("R",full.names = TRUE)
+for(archivo in my_files){
+  source(archivo)
+  cat("Procesando:", archivo, "\n")
+}
+```
+
+### Estudios de la comunicación en tránsito y en tiempos de espera
+
+-   El mundo de los mensajes publicitarios en el Subte de la Ciudad de Buenos Aires
+
+-   Análisis cuantitativo de los colores de las publicidades gráficas
+
+    -   El uso de software estadístico R: entorno de trabajo, acceso y manipulación de datos, análisis y representaciones gráficas.
+
+## 1️⃣ Librerías
+
+-   Herramientas de trabajo:
+
+    1.  Librerías y paquetes {tidyverse} {magick} y {googledrive}
+    2.  Funciones creadas para el análisis de los colores
+
+## 2️⃣ Base de datos: prueba piloto
+
+Naturaleza de las publicidades gráficas analizadas:
+
+1.  Fotografías de viajes personales en el Subte Línea B (2018 - 2022)
+2.  Publicidades de acceso público, fuentes nacionales e internacionales:
+    -   Presentes en todas las Líneas de Subte
+
+    -   Selección intermitente de los últimos 21 años (2001 - 2022)
+3.  Filtro de selección: representación del tiempo social y las formas de vida en la Ciudad de Buenos Aires
+
+## 3️⃣ Elaboración de funciones y gráficos
+
+### La organización del caos que produce el análisis cuantitativo
+
+-   Funciones creadas para el estudio de los colores de las publicidades y el acceso a datos factibles de análisis:
+    -   Códigos HEX
+
+    -   Valores RGB
+
+```{r}
+#| include: false
+#Acceso a los archivos locales
+my_data <- read_rds("tmp/file_info.rds")
+```
+
+## 📊 Analizar foto
+
+Acceso a los colores: La necesidad de manipular y transformar los datos y la creación de data frames basados en teoría RGB
+
+```{r}
+AD_FibertelM36 <- image_read("tmp/Subte B_2004_Fibertel---Vas-Más-Rápido.jpg")
+plot(AD_FibertelM36)
+```
+
+## 📊 Fibertel Subte*pass*: teoría HEX
+
+#### Primera aproximación
+
+```{r}
+#| echo: false
+AD_FibertelM36 <- "tmp/Subte B_2004_Fibertel---Vas-Más-Rápido.jpg"
+analizar_foto(AD_FibertelM36)
+```
+
+#### Caos inicial
+
+```{r}
+tmp1_AF_Fibertel <- image_read("tmp/Subte B_2004_Fibertel---Vas-Más-Rápido.jpg")
+tmp1_AF_Fibertel
+as.raster(tmp1_AF_Fibertel) %>% head(5)
+```
+
+## 📊 Fibertel Subte*pass*: organización HEX
+
+#### Búsqueda de los HEX predominantes en el caos
+
+```{r}
+#| echo: false
+tmp1_AF_Fibertel %>%
+  as.raster() %>%
+  as.matrix() %>%
+  as.vector() %>%
+  head()
+```
+
+```{r}
+#| echo: false
+mis_colores <- tmp1_AF_Fibertel %>% 
+  as.raster() %>% 
+  as.matrix() %>% 
+  as.vector() 
+```
+
+#### Deconstrucción de los HEXs en columnas
+
+```{r}
+#| echo: false
+my_data_AF_Fibertel <- data.frame(
+  R = str_sub(mis_colores,2,3),
+  G = str_sub(mis_colores,4,5),
+  B = str_sub(mis_colores,6,7),
+  A = str_sub(mis_colores,8,9)
+)
+
+my_data_AF_Fibertel  %>% head(15)
+```
+
+## 📊 Fibertel Subte*pass*: algoritmo y HEXs dominantes
+
+```{r}
+#| echo: false
+my_data_AF_Fibertel %>% 
+  mutate(
+    Red = stringr::str_sub(R,1,1) %>% stringr::str_c("0"),
+    Green = stringr::str_sub(G,1,1) %>% stringr::str_c("0"),
+    Blue = stringr::str_sub(B,1,1) %>% stringr::str_c("0"),
+    Alpha = stringr::str_sub(A,1,1) %>% stringr::str_c("0")
+      ) -> my_data_AF_Fibertel
+
+my_data_AF_Fibertel <- my_data_AF_Fibertel %>% 
+  mutate(color_nuevo = paste0("#",Red,Green,Blue))
+
+my_data_AF_Fibertel %>% 
+  group_by(color_nuevo) %>% 
+  tally(sort=TRUE) %>% 
+  head(30) -> tmp
+
+tmp %>% 
+  ggplot(aes(color_nuevo,n))+
+  geom_col(fill = tmp$color_nuevo)
+```
+
+## 📊 Visualizar RGB
+
+-   Lectura de los valores RGB de forma aíslada
+
+```{r}
+#| echo: false
+ADs <- read_rds("tmp/file_info.rds")
+AD_Actron <- paste0("tmp/",ADs$filename[22])
+
+colores_barchart(AD_Actron)
+AD_Actron <- magick::image_read(AD_Actron)
+plot(AD_Actron)
+```
