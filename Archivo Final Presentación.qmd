@@ -1,0 +1,408 @@
+---
+title: "Universo Subte Publicitario"
+subtitle: "Modelos de clasificación cromática: enfoques asistidos por inteligencia artificial"
+author: "Matías Salto, Aleksander Dietrichson"
+date: Nov. 09/2022
+format: revealjs
+editor: visual
+---
+
+## 🚇Introducción
+
+```{r}
+#| include: false
+library(tidyverse) #Manipulación de datos y gráficos
+library(googledrive) #Acceso al ecosistema de Google
+library(googlesheets4) #Acceso a la base de datos
+my_files <- dir("R",full.names = TRUE)
+for(archivo in my_files){
+  source(archivo)
+  cat("Procesando:", archivo, "\n")
+}
+```
+
+### Estudios de la comunicación en tránsito y en tiempos de espera
+
+-   El mundo de los mensajes publicitarios en el Subte de la Ciudad de Buenos Aires
+
+-   Análisis cuantitativo de los colores de las publicidades gráficas
+
+    -   El uso de software estadístico R: entorno de trabajo, acceso y manipulación de datos, análisis y representaciones gráficas.
+
+## 1️⃣ Librerías
+
+-   Herramientas de trabajo:
+
+    1.  Librerías y paquetes {tidyverse} {magick} y {googledrive}
+    2.  Funciones creadas para el análisis de los colores
+
+## 2️⃣ Base de datos: prueba piloto
+
+Naturaleza de las publicidades gráficas analizadas:
+
+1.  Fotografías de viajes personales en el Subte Línea B (2018 - 2022)
+2.  Publicidades de acceso público, fuentes nacionales e internacionales:
+    -   Presentes en todas las Líneas de Subte
+
+    -   Selección intermitente de los últimos 21 años (2001 - 2022)
+3.  Filtro de selección: representación del tiempo social y las formas de vida en la Ciudad de Buenos Aires
+
+## 3️⃣ Elaboración de funciones y gráficos
+
+### La organización del caos que produce el análisis cuantitativo
+
+-   Funciones creadas para el estudio de los colores de las publicidades y el acceso a datos factibles de análisis:
+    -   Códigos HEX
+
+    -   Valores RGB
+
+```{r}
+#| include: false
+#Acceso a los archivos locales
+my_data <- read_rds("tmp/file_info.rds")
+```
+
+## 📊 Analizar foto
+
+Acceso a los colores: La necesidad de manipular y transformar los datos y la creación de data frames basados en teoría RGB
+
+```{r}
+AD_FibertelM36 <- image_read("tmp/Subte B_2004_Fibertel---Vas-Más-Rápido.jpg")
+plot(AD_FibertelM36)
+```
+
+## 📊 Fibertel Subte*pass*: teoría HEX
+
+#### Primera aproximación
+
+```{r}
+#| echo: false
+AD_FibertelM36 <- "tmp/Subte B_2004_Fibertel---Vas-Más-Rápido.jpg"
+analizar_foto(AD_FibertelM36)
+```
+
+#### Caos inicial
+
+```{r}
+tmp1_AF_Fibertel <- image_read("tmp/Subte B_2004_Fibertel---Vas-Más-Rápido.jpg")
+tmp1_AF_Fibertel
+as.raster(tmp1_AF_Fibertel) %>% head(5)
+```
+
+## 📊 Fibertel Subte*pass*: organización HEX
+
+#### Búsqueda de los HEX predominantes en el caos
+
+```{r}
+#| echo: false
+tmp1_AF_Fibertel %>%
+  as.raster() %>%
+  as.matrix() %>%
+  as.vector() %>%
+  head()
+```
+
+```{r}
+#| echo: false
+mis_colores <- tmp1_AF_Fibertel %>% 
+  as.raster() %>% 
+  as.matrix() %>% 
+  as.vector() 
+```
+
+#### Deconstrucción de los HEXs en columnas
+
+```{r}
+#| echo: false
+my_data_AF_Fibertel <- data.frame(
+  R = str_sub(mis_colores,2,3),
+  G = str_sub(mis_colores,4,5),
+  B = str_sub(mis_colores,6,7),
+  A = str_sub(mis_colores,8,9)
+)
+
+my_data_AF_Fibertel  %>% head(15)
+```
+
+## 📊 Fibertel Subte*pass*: algoritmo y HEXs dominantes
+
+```{r}
+#| echo: false
+my_data_AF_Fibertel %>% 
+  mutate(
+    Red = stringr::str_sub(R,1,1) %>% stringr::str_c("0"),
+    Green = stringr::str_sub(G,1,1) %>% stringr::str_c("0"),
+    Blue = stringr::str_sub(B,1,1) %>% stringr::str_c("0"),
+    Alpha = stringr::str_sub(A,1,1) %>% stringr::str_c("0")
+      ) -> my_data_AF_Fibertel
+
+my_data_AF_Fibertel <- my_data_AF_Fibertel %>% 
+  mutate(color_nuevo = paste0("#",Red,Green,Blue))
+
+my_data_AF_Fibertel %>% 
+  group_by(color_nuevo) %>% 
+  tally(sort=TRUE) %>% 
+  head(30) -> tmp
+
+tmp %>% 
+  ggplot(aes(color_nuevo,n))+
+  geom_col(fill = tmp$color_nuevo)
+```
+
+## 📊 Visualizar RGB
+
+Ensayo de representación gráfica de valores RGB aíslados
+
+```{r}
+#| echo: false
+ADs <- read_rds("tmp/file_info.rds")
+AD_CocaCola <- paste0("tmp/",ADs$filename[19])
+AD_CocaCola1 <- image_read("tmp/Subte B_2018_Coca-Cola, Coca-Cola. Sentí el verano, sentí el sabor..jpeg")
+plot(AD_CocaCola1)
+```
+
+## 📊 Visualizar RGB: Coca Cola
+
+Aproximación reducida de lectura
+
+```{r}
+#| echo: false
+colores_barchart(AD_CocaCola)
+AD_Actron <- magick::image_read(AD_CocaCola)
+```
+
+## 📊 Visualizar RGB: Múltiples publicidades
+
+Ejemplo de sistematización de análisis:
+
+-   Observar la fuerza de los valores mediante distribución
+
+-   Mediante data frames
+
+```{r}
+#| results: asis
+#| echo: false 
+for(i in 1:3){
+  cat("  \n## Imagen ", i,"\n")
+  cat("::: {layout=\"[[1,1]]\"}","\n")
+  mi_filename <- paste0("tmp/",ADs$filename[i])
+  colores_barchart(mi_filename) %>% plot()
+  #cat("\n\n")
+  mi_imagen <- magick::image_read(mi_filename)
+  plot(mi_imagen)
+  cat(":::\n\n")
+}
+# i = 1
+# mi_filename <- paste0("tmp/",ADs$filename[i])
+```
+
+## 📊 Colores primarios
+
+Representación combinada y el sinfín de valores posibles
+
+```{r}
+#| echo: false
+  AD_KitKat <-image_read("tmp/Subte B_2018_KitKat.jpeg")
+plot(AD_KitKat)
+to_RGB_df(AD_KitKat) -> my_data_colores_primarios
+```
+
+## 📊 Colores primarios: cálculo de distancias
+
+```{r}
+colores_primarios %>% 
+  select(-value) %>% 
+  knitr::kable(caption = "Colores Primarios")
+#Ver colores primarios en tabla
+```
+
+## 📊 Colores primarios: valores HEX
+
+```{r}
+#| echo: false
+my_data2_AD_KitKat <- to_RGB_df(AD_KitKat)
+cp <- colores_primarios
+my_data2_AD_KitKat$color_name <- 
+  purrr::pmap(my_data2_AD_KitKat,~{
+    dist_vec <- sqrt((..1-cp$R)^2+(..2-cp$G)^2+(..3-cp$B)^2)
+    res <- which.min(dist_vec)
+    cp$color_name[[res]] 
+    # res
+  }) %>% unlist()
+my_data2_AD_KitKat <- my_data2_AD_KitKat %>% 
+  left_join(colores_primarios %>% select(color_name, hex))
+
+my_color_scale <- colores_primarios$hex
+names(my_color_scale) <- colores_primarios$color_name
+my_data2_AD_KitKat %>% 
+  group_by(color_name,hex) %>% 
+  count() %>% 
+  ggplot(aes(x=color_name,y=n,fill=color_name))+
+  geom_col()+
+  scale_fill_manual(values = my_color_scale)+
+   theme(legend.position="none")
+```
+
+## 📊 Esquema de color
+
+Función de redondeo flexible sobre la publicidad
+
+```{r}
+AD_Viajar <- image_read("tmp/Subte B_2008_Compra-Tu-Paquete-Por-Teléfono---Serial-M30.jpg")
+plot(AD_Viajar)
+```
+
+## 📊 Esquema de color
+
+1.  Calculamos los valores RGB del Subtepass en un data frame
+
+```{r}
+round_to_any <- function (x, accuracy, f = round) 
+{
+  f(x/accuracy) * accuracy
+}
+round_RGB_df <- function(df, accuracy, f = round, max_val = 255){
+  df %>% 
+    mutate(
+      R = round_to_any(R, accuracy, f),
+      G = round_to_any(G, accuracy, f),
+      B = round_to_any(B, accuracy, f)
+    ) %>% 
+    mutate(
+      R = ifelse(R > max_val, max_val, R ),
+      G = ifelse(G > max_val, max_val, G ),
+      B = ifelse(B > max_val, max_val, B ),
+      )
+}
+my_data3 <- to_RGB_df(AD_Viajar)
+head(my_data3)
+```
+
+2.  Redondeo a un valor específico. Ejemplo: al 5 más cercano
+
+```{r}
+my_data3 %>% 
+  round_RGB_df(accuracy = 5) %>% 
+  head()
+```
+
+## 📊 Esquema de color: representación gráfica
+
+```{r}
+#| echo: false
+esquema_de_color(AD_Viajar, accuracy = 60)
+```
+
+## 📊 Esquema de color: otras publicidades
+
+```{r}
+AD_Flybondi <- image_read("tmp/Subte A_2018_Flybondi.jpeg")
+to_RGB_df(AD_Flybondi) -> my_data_colores_primarios_bondi
+plot(AD_Flybondi)
+```
+
+## 📊 Esquema de color: Flybondi
+
+```{r}
+esquema_de_color(AD_Flybondi, accuracy = 75)
+```
+
+## 📊 Modelo de regresión logística
+
+```{r}
+my_data <- read_rds("./modelos/my_data2.Rds")
+model <- read_rds("./modelos/my_model2.Rds")
+```
+
+-   Modelo sencillo con tres términos
+
+-   No analiza las interacciones entre los colores
+
+$$
+logit(p_i) = \beta_0 + \beta_R+\beta_G+\beta_B
+$$
+
+## 📊 Coeficientes
+
+Expresados en **logaritmos de la razón de momios**
+
+```{r}
+#| echo: true
+coef(model)
+```
+
+$$
+logit(p_i) = \beta_0 + \beta_R+\beta_G+\beta_B \\
+logit(p_i)= 2.63604699+\\
+(-0.12782665\times{Red})+\\
+(0.09122828\times{Green})+\\
+(0.01935391\times{Blue})
+$$
+
+## 📊 Ejemplos
+
+```{r}
+#| echo: true
+my_data[1,] %>% 
+  select(Red, Green, Blue)
+```
+
+```{r}
+#| include: false
+my_coef <- coef(model)
+my_sum = sum(my_coef[2:4]*my_data[1,c("Red","Green","Blue")])+my_coef[[1]]
+my_percentage <- exp(my_sum)/(1+exp(my_sum))
+```
+
+## 📊 Ejemplos: interpretar resultado
+
+-   Expresados en **logaritmos de la razón de momios**
+
+-   Se puede convertir en porcentaje con:
+
+$$
+p = {e^{\beta_0 + \beta_R+\beta_G+\beta_B }\over{1+e^{{\beta_0 + \beta_R+\beta_G+\beta_B }}}}\\
+={e^{2.327996}\over{1+e^{2.327996}}}\\
+=0.9111693 \sim 91.11\%
+$$
+
+## 📊 Ejemplo: hacerlo directamente en R
+
+```{r}
+#| echo: true
+  predict(model,newdata = my_data[1,], type="response")
+```
+
+## 📊 Visualizar el modelo
+
+```{r}
+#| echo: false
+#| warning: false
+tmp_df2 <-
+  data.frame(
+    pred = predict(model),
+    hp = ifelse(my_data$pred_dura=="Frío",1,0)
+  )
+tmp_df2 %>% 
+  ggplot(aes(y=hp,x=pred))+
+  geom_point()+
+  xlim(-4, 4)+
+  geom_function(fun=function(x){
+    (1 / (1 + exp(-x)))
+    }, color = "red", lty=2, lwd=1)+
+  theme(axis.text.x=element_blank(),
+      axis.ticks.x=element_blank(),
+      axis.text.y=element_blank(),
+      axis.ticks.y=element_blank())
+```
+
+## 🚇 Comentarios finales
+
+```{r}
+FinalAD <- image_read("Eidan.jpg")
+plot(FinalAD)
+```
+
+-   Algoritmo de enfoque
+
+-   Dimensión cualitativa de la tesina: tiempos sociales y formas de vida en la publicidad
