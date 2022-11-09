@@ -384,8 +384,6 @@ my_sum = sum(my_coef[2:4]*my_data[1,c("Red","Green","Blue")])+my_coef[[1]]
 my_percentage <- exp(my_sum)/(1+exp(my_sum))
 ```
 
-## 📊 Ejemplos
-
 $$
 \begin{align}
 2.63604699\\
