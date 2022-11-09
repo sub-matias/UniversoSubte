@@ -318,6 +318,10 @@ model <- read_rds("./modelos/my_model2.Rds")
 
 -   No analiza las interacciones entre los colores
 
+-   Basado en 45 imagenes clasificado por un humano (F)
+
+-   Input: El promedio de los colores en la foto (Red, Green, Blue)
+
 $$
 logit(p_i) = \beta_0 + \beta_R+\beta_G+\beta_B
 $$
@@ -353,6 +357,10 @@ my_coef <- coef(model)
 my_sum = sum(my_coef[2:4]*my_data[1,c("Red","Green","Blue")])+my_coef[[1]]
 my_percentage <- exp(my_sum)/(1+exp(my_sum))
 ```
+
+$$
+\begin{align}2.63604699\\+(-0.12782665\times\color{red}{85.8014})\\+(0.09122828\times\color{green}{94.8045 })\\\underline{+(0.01935391\times\color{blue}{103.8965})    }\\=\underline{\underline{2.327996}}\end{align}
+$$
 
 ## 📊 Ejemplos: interpretar resultado
 
