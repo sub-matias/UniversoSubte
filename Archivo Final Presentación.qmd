@@ -47,6 +47,31 @@ Naturaleza de las publicidades gráficas analizadas:
     -   Selección intermitente de los últimos 21 años (2001 - 2022)
 3.  Filtro de selección: representación del tiempo social y las formas de vida en la Ciudad de Buenos Aires
 
+## 2️⃣ Base de datos: prueba piloto
+
+::: {style="font-size: 0.8em; text-align: left"}
+```{r results='asis'}
+my_data <- read_rds("./modelos/my_data2.Rds")
+my_data[,1:12] %>% 
+  colnames() ->tmp
+
+for(t in tmp){
+  cat("* ",t,"\n")
+}
+```
+:::
+
+## 2️⃣ Base de datos: prueba piloto
+::: {style="font-size: 0.5em; text-align: left"}
+
+```{r}
+my_data[,1:9] %>% 
+  head(10) %>% 
+  knitr::kable()
+```
+:::
+
+
 ## 3️⃣ Elaboración de funciones y gráficos
 
 ### La organización del caos que produce el análisis cuantitativo
