@@ -1,0 +1,138 @@
+---
+title: "Vivir a través del tiempo"
+subtitle: "Análisis cuantitativo de colores en ADs"
+author: "Matías Salto, Aleksander Dietrichson"
+date: Feb. 28/2025
+format: pdf
+editor: visual
+---
+
+## Vivir a través del tiempo: ADs
+
+```{r}
+#| include: false
+library(tidyverse) #Manipulación de datos y gráficos
+library(magick)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+my_files <- dir("R",full.names = TRUE)
+for(archivo in my_files){
+  source(archivo)
+  cat("Procesando:", archivo, "\n")
+}
+```
+
+### Dominante cromática
+
+```{r}
+
+# Las ADs se encuentran subidas a R, por lo que ya no es necesaria la conexión con GDrive
+AD_Subtepass<- image_read("ADs/subtepass.jpg")
+AD_Actron<- image_read("ADs/actron.jpg")
+AD_Peugeot<- image_read("ADs/peugeot.jpg")
+AD_Rapipago<- image_read("ADs/rapipago.png")
+AD_Ripio<- image_read("ADs/ripio.jpg")
+AD_Seremix<- image_read("ADs/seremix.jpg")
+#Análisis de primera
+plot(AD_Subtepass)
+```
+
+```{r}
+round_to_any <- function (x, accuracy, f = round) 
+{
+  f(x/accuracy) * accuracy
+}
+round_RGB_df <- function(df, accuracy, f = round, max_val = 255){
+  df %>%
+    mutate(
+      R = round_to_any(R, accuracy, f),
+      G = round_to_any(G, accuracy, f),
+      B = round_to_any(B, accuracy, f)
+    ) %>% 
+    mutate(
+      R = ifelse(R > max_val, max_val, R ),
+      G = ifelse(G > max_val, max_val, G ),
+      B = ifelse(B > max_val, max_val, B ),
+      )
+}
+data_subtepass <- to_RGB_df(AD_Subtepass)
+head(data_subtepass)
+
+data_actron <- to_RGB_df(AD_Actron)
+head(data_actron)
+
+data_peugeot <- to_RGB_df(AD_Peugeot)
+head(data_peugeot)
+
+data_rapipago <- to_RGB_df(AD_Rapipago)
+head(data_rapipago)
+
+data_ripio <- to_RGB_df(AD_Ripio)
+head(data_ripio)
+
+data_seremix <- to_RGB_df(AD_Seremix)
+head(data_seremix)
+```
+
+Redondeo a valor específico:
+
+```{r}
+data_subtepass %>% 
+  round_RGB_df(accuracy = 5) %>% 
+  head()
+
+data_actron %>% 
+  round_RGB_df(accuracy = 5) %>% 
+  head()
+
+data_peugeot %>% 
+  round_RGB_df(accuracy = 5) %>% 
+  head()
+
+data_rapipago %>% 
+  round_RGB_df(accuracy = 5) %>% 
+  head()
+
+data_ripio %>% 
+  round_RGB_df(accuracy = 5) %>% 
+  head()
+
+data_seremix %>% 
+  round_RGB_df(accuracy = 5) %>% 
+  head()
+```
+
+```{r}
+#| echo: false
+esquema_de_color(AD_Subtepass, accuracy = 60)
+```
+
+```{r}
+#| echo: false
+esquema_de_color(AD_Peugeot, accuracy = 60)
+plot(AD_Peugeot)
+```
+
+```{r}
+#| echo: false
+esquema_de_color(AD_Actron, accuracy = 60)
+```
+
+```{r}
+#| echo: false
+esquema_de_color(AD_Rapipago, accuracy = 60)
+plot(AD_Rapipago)
+```
+
+```{r}
+#| echo: false
+esquema_de_color(AD_Ripio, accuracy = 60)
+plot(AD_Ripio)
+```
+
+```{r}
+#| echo: false
+esquema_de_color(AD_Seremix, accuracy = 60)
+plot(AD_Seremix)
+```
