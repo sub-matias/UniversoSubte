@@ -17,7 +17,7 @@ round_RGB_df <- function(df, accuracy, f = round, max_val = 255){
     )
 }
 
-esquema_de_color <- function(imagen, accuracy = 190){
+esquema_de_color_df <- function(imagen, accuracy = 190){
   tmp_df <- to_RGB_df(imagen) %>% 
     round_RGB_df (accuracy = accuracy) %>% 
     mutate(RGB = rgb(R,G,B, maxColorValue = 255))
@@ -26,7 +26,16 @@ esquema_de_color <- function(imagen, accuracy = 190){
   names(my_color_codes) <- my_color_codes
   tmp_df %>% 
     group_by(RGB) %>% 
-    count() %>% 
+    count()
+}
+
+esquema_de_color <- function(imagen, accuracy = 190){
+  
+  tmp_df <-esquema_de_color_df (imagen, accuracy) 
+  #Escala
+  my_color_codes <- tmp_df$RGB %>% unique
+  names(my_color_codes) <- my_color_codes
+  tmp_df    %>% 
     ggplot(aes(x=RGB,y=n,fill=RGB))+
     geom_col()+
     scale_fill_manual(values = my_color_codes)+
