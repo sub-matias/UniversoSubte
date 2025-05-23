@@ -11,6 +11,14 @@ editor: visual
 
 ## Solución
 
+```{r}
+#| include: false
+library(tidyverse)
+library(magick)
+source("R/esquema-de-color.R")
+source("R/convert-to-df.R")
+```
+
 Para tratarlo matemáticamente necesitamos una formula que incluya los términos R, G y B, posiblemente con interacciones.
 
 ### Definición
@@ -92,7 +100,9 @@ esquema_de_color_df(AD_Seremix, accuracy = 60) %>%
 ```
 
 ```{r}
-
+#| fig-width: 2
+#| fig-height: 2
+#| 
   my_color_codes <- tmp_df$RGB %>% unique
   names(my_color_codes) <- my_color_codes
 tmp_df %>% 
