@@ -105,7 +105,7 @@ data_seremix %>%
 
 ```{r}
 #| echo: false
-esquema_de_color(AD_Subtepass, accuracy = 60)
+esquema_de_color(AD_Subtepass, accuracy = 120)
 ```
 
 ```{r}
@@ -121,7 +121,7 @@ esquema_de_color(AD_Actron, accuracy = 60)
 
 ```{r}
 #| echo: false
-esquema_de_color(AD_Rapipago, accuracy = 60)
+esquema_de_color(AD_Rapipago, accuracy = 160)
 plot(AD_Rapipago)
 ```
 
@@ -136,3 +136,9 @@ plot(AD_Ripio)
 esquema_de_color(AD_Seremix, accuracy = 60)
 plot(AD_Seremix)
 ```
+
+```{r}
+esquema_de_color(AD_Seremix, accuracy = 60)
+```
+
+
